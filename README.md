@@ -199,8 +199,6 @@ The runbook includes embedded one-click links launching the exact OSINT tools ne
 <li>Intelligence briefs</li>
 </ul>
 
-<h2>🧠 Technical Architecture</h2>
-
 <h2>⚙️ Under the Hood</h2>
 
 <h3>1. Pure HTML + CSS + JS</h3>
