@@ -8,7 +8,7 @@
 
 <h1>🏢 OSINT Company Screening Runbook</h1>
 <p><strong>Interactive HTML Worksheet for Corporate Background Investigations</strong><br>
-Version 2.1 — Zero-Cost Edition<br>
+Zero-Cost Edition<br>
 License: Non-Commercial Use Only (CC BY-NC 4.0)</p>
 
 <h2>📌 Overview</h2>
