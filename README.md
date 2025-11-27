@@ -2,42 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>OSINT Company Screening Runbook – README</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<style>
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  line-height: 1.55;
-  padding: 40px;
-  max-width: 900px;
-  margin: auto;
-}
-h1, h2, h3 {
-  font-weight: 700;
-}
-code {
-  background: #f4f4f4;
-  padding: 3px 6px;
-  border-radius: 4px;
-}
-pre {
-  background: #f4f4f4;
-  padding: 12px;
-  border-radius: 6px;
-  overflow-x: auto;
-}
-details {
-  margin: 10px 0;
-  padding: 10px;
-  border-left: 4px solid #999;
-  background: #fafafa;
-}
-summary {
-  cursor: pointer;
-  font-weight: bold;
-}
-ul { margin-top: 6px; }
-</style>
+
 </head>
 <body>
 
