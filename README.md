@@ -201,21 +201,6 @@ The runbook includes embedded one-click links launching the exact OSINT tools ne
 
 <h2>🧠 Technical Architecture</h2>
 
-<h3>🏗️ Project Structure</h3>
-
-<pre>
-/OSINT-Company-Screening-Runbook/
-│── README.md
-│── LICENSE
-│── CONTRIBUTING.md
-│── SECURITY.md
-│── .github/
-│   ├── ISSUE_TEMPLATE.md
-│   ├── BUG_REPORT.md
-│   └── PULL_REQUEST_TEMPLATE.md
-└── OSINT Corp Background Check Worksheet.html
-</pre>
-
 <h2>⚙️ Under the Hood</h2>
 
 <h3>1. Pure HTML + CSS + JS</h3>
