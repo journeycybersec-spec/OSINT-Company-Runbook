@@ -11,6 +11,9 @@
 Zero-Cost Edition<br>
 License: Non-Commercial Use Only (CC BY-NC 4.0)</p>
 
+<img src="image/sc1.png" alt="Screenshot 1">
+<img src="image/sc2.png" alt="Screenshot 2">
+
 <h2>📌 Overview</h2>
 <p>
 The <strong>OSINT Company Screening Runbook</strong> is a fully interactive, zero-cost, browser-based worksheet designed for:
