@@ -1,0 +1,2891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OSINT Company Screening Runbook v2.1 — Interactive Manual</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card-bg: #111827;
+      --accent: #3b82f6;
+      --accent-soft: rgba(59, 130, 246, 0.15);
+      --danger: #f97373;
+      --border: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --note-bg: #020617;
+      --note-border: #1e293b;
+      --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.45);
+      --radius-lg: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #0f172a, #020617 55%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar navigation */
+    #sidebar {
+      width: 270px;
+      background: rgba(15, 23, 42, 0.95);
+      border-right: 1px solid var(--border);
+      padding: 18px 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    #sidebar h1 {
+      font-size: 1.1rem;
+      margin: 0 0 4px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    #sidebar h2 {
+      font-size: 1.35rem;
+      margin: 6px 0 14px;
+    }
+
+    #sidebar small {
+      display: block;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .nav-section-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 14px 0 6px;
+    }
+
+    #nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    #nav-list li {
+      margin-bottom: 4px;
+    }
+
+    #nav-list a {
+      display: block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      color: var(--text-main);
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+      cursor: pointer;
+    }
+
+    #nav-list a:hover {
+      background: rgba(15, 118, 255, 0.14);
+      border-color: rgba(37, 99, 235, 0.7);
+      transform: translateX(1px);
+    }
+
+    #nav-list a.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .nav-sub {
+      margin-left: 14px;
+      font-size: 0.85rem;
+    }
+
+    /* Top actions in sidebar */
+    .sidebar-actions {
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      margin: 2px 0;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, #020617, #020617);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+    }
+
+    .btn.primary {
+      border-color: var(--accent);
+      background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.3), #020617 60%);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      background: radial-gradient(circle at top, rgba(59, 130, 246, 0.23), #020617 60%);
+    }
+
+    .btn span.icon {
+      font-size: 1rem;
+    }
+
+    /* Main content */
+    #main {
+      flex: 1;
+      padding: 20px 24px 40px;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      max-width: 980px;
+      margin: 0 auto 18px;
+    }
+
+    .page-title {
+      font-size: 1.7rem;
+      margin: 0 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-subtitle {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .section-card {
+      scroll-margin-top: 80px;
+      max-width: 980px;
+      margin: 0 auto 14px;
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+
+    .section-inner {
+      padding: 12px 16px 14px;
+    }
+
+    details.section-toggle {
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    details.section-toggle[open] .section-summary {
+      border-bottom: 1px solid rgba(55, 65, 81, 0.7);
+      margin-bottom: 10px;
+    }
+
+    .section-summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 10px 16px 10px;
+      background: linear-gradient(120deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.99));
+    }
+
+    .section-summary-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.4), rgba(15, 23, 42, 0.9));
+      font-size: 1rem;
+    }
+
+    .section-title-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .section-title-main {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .section-title-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .section-chevron {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    h3 {
+      margin: 10px 0 6px;
+      font-size: 0.98rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    h4 {
+      margin: 8px 0 4px;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    p, li {
+      font-size: 0.9rem;
+      line-height: 1.45;
+      color: var(--text-main);
+    }
+
+    ul {
+      margin: 4px 0 8px 18px;
+      padding: 0;
+    }
+
+    a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .callout {
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin: 6px 0 8px;
+      font-size: 0.86rem;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .callout-label {
+      font-weight: 600;
+    }
+
+    .callout.tip {
+      background: rgba(45, 212, 191, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+    .callout.warn {
+      background: rgba(248, 113, 113, 0.06);
+      border: 1px solid rgba(248, 113, 113, 0.6);
+    }
+
+    .callout.tool {
+      background: rgba(59, 130, 246, 0.06);
+      border: 1px solid rgba(59, 130, 246, 0.6);
+    }
+
+    .notes-box {
+      margin-top: 8px;
+      padding: 8px 10px 10px;
+      border-radius: 10px;
+      background: var(--note-bg);
+      border: 1px solid var(--note-border);
+    }
+
+    .notes-box-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .notes-label-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .notes-label-left span.icon {
+      font-size: 0.9rem;
+    }
+
+    textarea.section-notes {
+      width: 100%;
+      min-height: 90px;
+      max-height: 260px;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--note-border);
+      resize: vertical;
+      background: #020617;
+      color: var(--text-main);
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.8rem;
+    }
+
+    .notes-hint {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    pre {
+      background: #020617;
+      border: 1px solid var(--note-border);
+      border-radius: 8px;
+      padding: 10px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+
+    code {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.85em;
+      color: #60a5fa;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 0.88rem;
+    }
+
+    table th {
+      background: rgba(59, 130, 246, 0.1);
+      padding: 8px;
+      text-align: left;
+      border: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    table td {
+      padding: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .red-flag {
+      color: #f87171;
+      font-weight: 600;
+    }
+
+    .field-input {
+      width: calc(100% - 20px);
+      max-width: 600px;
+      padding: 6px 10px;
+      margin: 4px 0 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #020617;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .field-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: #0f172a;
+    }
+
+    .field-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        flex-direction: column;
+      }
+
+      #sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        display: block;
+      }
+
+      #main {
+        padding: 16px 14px 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside id="sidebar">
+    <h1>OSINT Runbook</h1>
+    <input id="global-search" type="text" placeholder="Search entire manual..." style="width:100%;padding:6px;margin:10px 0;border-radius:6px;border:1px solid var(--border);background:#0f172a;color:var(--text-main);">
+    <h2>Company Screening</h2>
+    <small>Interactive, local-only, case notes stay in your browser.</small>
+
+    <div class="nav-section-label">Core Workflow</div>
+    <ul id="nav-list">
+      <li><a href="#sec-0">0. Purpose</a></li>
+      <li><a href="#sec-opsec">1. OPSEC & Safety Setup</a></li>
+      <li><a href="#sec-1">2. Pre-Engagement</a></li>
+      <li><a href="#sec-mod1">3. Corporate Footprint</a></li>
+      <li><a href="#sec-mod2">4. Cyber Risk & Hygiene</a></li>
+      <li><a href="#sec-mod3">5. Legitimacy & Financial</a></li>
+      <li><a href="#sec-mod4">6. People OSINT</a></li>
+      <li><a href="#sec-mod5">7. Reputation & Sentiment</a></li>
+      <li><a href="#sec-mod6">8. Local Automated Scanning</a></li>
+      <li><a href="#sec-risk">9. Risk Scoring Model</a></li>
+    </ul>
+
+    <div class="sidebar-actions">
+      <button class="btn" id="btn-expand-all"><span class="icon">➕</span><span>Expand All</span></button>
+      <button class="btn" id="btn-collapse-all"><span class="icon">➖</span><span>Collapse All</span></button>
+      <button class="btn primary" id="btn-export-notes"><span class="icon">📤</span><span>Export All Notes</span></button>
+      <button class="btn" id="btn-clear-notes"><span class="icon">🧹</span><span>Clear Notes</span></button>
+    </div>
+  </aside>
+
+  <main id="main">
+    <header class="page-header">
+      <div class="page-title">🏢 OSINT Company Screening Runbook</div>
+      <p class="page-subtitle">Version 2.1 • Zero-Cost Edition • Interactive HTML with per-section notes and local-only storage.</p>
+      <div class="badge"><span class="dot"></span> Offline-friendly & investigator-focused</div>
+    </header>
+
+    <!-- SECTION 0: PURPOSE -->
+    <section id="sec-0" class="section-card">
+      <details class="section-toggle" open>
+        <summary class="section-summary">
+          <div class="section-summary-left">
+            <div class="section-icon">🎯</div>
+            <div class="section-title-text">
+              <span class="section-title-main">0. Purpose</span>
+              <span class="section-title-sub">Define why you are running this OSINT screening.</span>
+            </div>
+          </div>
+          <div class="section-chevron">▼</div>
+        </summary>
+        <div class="section-inner">
+          <p>This workflow provides a complete, repeatable, zero-cost OSINT process for evaluating companies, vendors, clients, and partners.</p>
+          
+          <h3>Objectives</h3>
+          <ul>
+            <li>All tools used in this runbook are <strong>free</strong> and <strong>linked inline</strong> for fast use.</li>
+            <li>Scope and expectations with stakeholders have been discussed (what this runbook can and cannot prove).</li>
+            <li>This provides a structured, defensible methodology for organizational risk assessment.</li>
+          </ul>
+
+          <div class="notes-box" data-section="sec-0">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder="Why are you running this screening? Who is the client? Any special constraints or hypotheses?"></textarea>
+            <div class="notes-hint">Notes are saved locally in your browser (per device).</div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 1: OPSEC & SAFETY SETUP -->
+    <section id="sec-opsec" class="section-card">
+      <details class="section-toggle">
+        <summary class="section-summary">
+          <div class="section-summary-left">
+            <div class="section-icon">🔒</div>
+            <div class="section-title-text">
+              <span class="section-title-main">1. OPSEC & Safety Setup</span>
+              <span class="section-title-sub">Protect yourself before conducting online investigations.</span>
+            </div>
+          </div>
+          <div class="section-chevron">▼</div>
+        </summary>
+        <div class="section-inner">
+          
+          <div class="callout warn">
+            <div>⚠️ <span class="callout-label">Critical Warning</span><br>
+              OSINT investigations can expose your identity, location, and intentions to targets. Advanced adversaries may monitor who is researching them. Always implement proper operational security before beginning any investigation.
+            </div>
+          </div>
+
+          <h3>A. Network Security & Anonymization</h3>
+          
+          <h4>1. VPN Configuration</h4>
+          <ul>
+            <li><strong>Use a reputable VPN service:</strong> <input type="text" class="field-input" placeholder="VPN provider and server location used"></li>
+            <li><strong>Avoid free VPNs:</strong> They may log your activity or sell your data</li>
+            <li><strong>Choose jurisdiction carefully:</strong> <input type="text" class="field-input" placeholder="VPN jurisdiction selected (avoid 5/9/14 Eyes)"></li>
+            <li><strong>Enable kill switch:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Verified VPN kill switch is active</label></li>
+          </ul>
+
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Recommended VPN Providers</span><br>
+              <a href="https://mullvad.net" target="_blank">Mullvad</a> •
+              <a href="https://nordvpn.com/" target="_blank">NordVPN</a> •
+              <a href="https://protonvpn.com" target="_blank">ProtonVPN</a>
+            </div>
+          </div>
+
+          <h4>2. Tor Browser (for High-Risk Investigations)</h4>
+          <ul>
+            <li><strong>Download Tor Browser:</strong> <a href="https://www.torproject.org" target="_blank">Tor Project</a></li>
+            <li><strong>Use Tor over VPN:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">VPN connected before starting Tor</label></li>
+            <li><strong>Never maximize Tor window:</strong> Preserves fingerprint resistance</li>
+            <li><strong>Disable JavaScript when possible:</strong> Use NoScript add-on</li>
+            <li><strong>Never login to personal accounts:</strong> Maintains anonymity</li>
+          </ul>
+
+          <div class="callout warn">
+            <div>⚠️ <span class="callout-label">Tor Limitations</span><br>
+              Many OSINT tools and websites block Tor exit nodes. Use Tor strategically for sensitive queries only, and use VPN for general research.
+            </div>
+          </div>
+
+          <h3>B. Browser & Device Configuration</h3>
+
+          <h4>3. Dedicated OSINT Browser Profile</h4>
+          <ul>
+            <li><strong>Create separate browser profile:</strong> <input type="text" class="field-input" placeholder="Browser and profile name used"></li>
+            <li><strong>Never use personal browser:</strong> Prevents data leakage and tracking</li>
+            <li><strong>Disable browser sync:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Browser sync disabled</label></li>
+            <li><strong>Use private/incognito mode:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Always using private browsing</label></li>
+          </ul>
+
+          <h4>4. Essential Browser Extensions</h4>
+          <ul>
+            <li><strong>uBlock Origin:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Installed (blocks ads, trackers, malware)</label></li>
+            <li><strong>Privacy Badger:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Installed (blocks invisible trackers)</label></li>
+            <li><strong>HTTPS Everywhere:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Installed (forces HTTPS)</label></li>
+            <li><strong>Decentraleyes:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Installed (blocks CDN tracking)</label></li>
+            <li><strong>User-Agent Switcher:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Installed (masks browser fingerprint)</label></li>
+          </ul>
+
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Browser Privacy Tools</span><br>
+              <a href="https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/" target="_blank">uBlock Origin</a> •
+              <a href="https://privacybadger.org/" target="_blank">Privacy Badger</a> •
+              <a href="https://www.eff.org/https-everywhere" target="_blank">HTTPS Everywhere</a> •
+              <a href="https://decentraleyes.org/" target="_blank">Decentraleyes</a>
+            </div>
+          </div>
+
+          <h4>5. Browser Privacy Settings</h4>
+          <ul>
+            <li><strong>Disable WebRTC:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">WebRTC disabled (prevents IP leaks)</label></li>
+            <li><strong>Block third-party cookies:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Third-party cookies blocked</label></li>
+            <li><strong>Disable location services:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Location services disabled</label></li>
+            <li><strong>Clear cookies/cache after each session:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Auto-clear enabled</label></li>
+            <li><strong>Disable password saving:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Password manager disabled in this profile</label></li>
+          </ul>
+
+          <div class="callout tip">
+            <div>💡 <span class="callout-label">Test Your Setup</span><br>
+              Check for leaks: <a href="https://browserleaks.com" target="_blank">BrowserLeaks</a> •
+              <a href="https://ipleak.net" target="_blank">IPLeak</a> •
+              <a href="https://coveryourtracks.eff.org" target="_blank">Cover Your Tracks</a>
+            </div>
+          </div>
+
+          <h3>C. Identity Compartmentalization</h3>
+
+          <h4>6. Burner Email Accounts</h4>
+          <ul>
+            <li><strong>Create dedicated OSINT email(s):</strong> <input type="text" class="field-input" placeholder="Burner email addresses created"></li>
+            <li><strong>Use temporary email for trials:</strong> <a href="https://temp-mail.org" target="_blank">Temp-Mail</a> • <a href="https://guerrillamail.com" target="_blank">Guerrilla Mail</a></li>
+            <li><strong>Never link to personal accounts:</strong> No recovery emails to personal addresses</li>
+            <li><strong>Use pseudonyms:</strong> <input type="text" class="field-input" placeholder="Persona/pseudonym used for this investigation"></li>
+          </ul>
+
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Private Email Providers</span><br>
+              <a href="https://proton.me" target="_blank">ProtonMail</a> •
+              <a href="https://tutanota.com" target="_blank">Tutanota</a> •
+              <a href="https://mailfence.com" target="_blank">Mailfence</a>
+            </div>
+          </div>
+
+          <h4>7. Persona Management</h4>
+          <ul>
+            <li><strong>Create consistent persona:</strong> <input type="text" class="field-input" placeholder="Name, age, location of persona"></li>
+            <li><strong>Generate fake details:</strong> <a href="https://www.fakenamegenerator.com" target="_blank">Fake Name Generator</a> • <a href="https://thispersondoesnotexist.com" target="_blank">AI-Generated Photos</a></li>
+            <li><strong>Document your persona:</strong> <input type="text" class="field-input" placeholder="Location of persona documentation"></li>
+            <li><strong>Never reuse personas across investigations:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Using unique persona for this case</label></li>
+          </ul>
+
+          <h4>8. Virtual Phone Numbers</h4>
+          <ul>
+            <li><strong>SMS verification services:</strong> <input type="text" class="field-input" placeholder="Virtual phone number(s) used"></li>
+            <li><strong>VoIP services:</strong> <a href="https://www.google.com/voice" target="_blank">Google Voice</a> • <a href="https://www.burnerapp.com" target="_blank">Burner</a> • <a href="https://hushed.com" target="_blank">Hushed</a></li>
+            <li><strong>Never use personal phone:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Only using burner numbers</label></li>
+          </ul>
+
+          <h3>D. Device & Environment Security</h3>
+
+          <h4>9. Operating System Considerations</h4>
+          <ul>
+            <li><strong>Use dedicated device if possible:</strong> <input type="text" class="field-input" placeholder="Device used for investigation"></li>
+            <li><strong>Consider live OS:</strong> <a href="https://tails.boum.org" target="_blank">Tails</a> (boots from USB, leaves no trace)</li>
+            <li><strong>Virtual Machine option:</strong> <input type="text" class="field-input" placeholder="VM software and OS used (if applicable)"></li>
+            <li><strong>Full disk encryption:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Device is fully encrypted</label></li>
+            <li><strong>Firewall enabled:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Host firewall configured</label></li>
+          </ul>
+
+          <h4>10. Physical Environment</h4>
+          <ul>
+            <li><strong>Work from secure location:</strong> <input type="text" class="field-input" placeholder="Current working location"></li>
+            <li><strong>Avoid public WiFi:</strong> Or use VPN if necessary</li>
+            <li><strong>Cover webcam:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Webcam covered</label></li>
+            <li><strong>Privacy screen filter:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Using privacy screen (if in public)</label></li>
+            <li><strong>Be aware of shoulder surfing:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Physically secure environment confirmed</label></li>
+          </ul>
+
+          <h3>E. Data Handling & Evidence Management</h3>
+
+          <h4>11. Secure Storage</h4>
+          <ul>
+            <li><strong>Encrypted storage location:</strong> <input type="text" class="field-input" placeholder="Path to encrypted investigation folder"></li>
+            <li><strong>Use VeraCrypt:</strong> <a href="https://www.veracrypt.fr" target="_blank">VeraCrypt</a> for encrypted containers</li>
+            <li><strong>Never store on cloud without encryption:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">All data stored locally or encrypted</label></li>
+            <li><strong>Regular backups (encrypted):</strong> <input type="text" class="field-input" placeholder="Backup schedule and location"></li>
+          </ul>
+
+          <h4>12. Screenshot & Documentation OPSEC</h4>
+          <ul>
+            <li><strong>Strip metadata from files:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Using metadata removal tool</label></li>
+            <li><strong>Tool for metadata removal:</strong> <a href="https://exiftool.org" target="_blank">ExifTool</a> • <a href="https://metadata.systemli.org/" target="_blank">MAT2</a></li>
+            <li><strong>Redact sensitive info in screenshots:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Checklist in place for redaction</label></li>
+            <li><strong>Timestamp all evidence:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Using consistent timestamp format</label></li>
+          </ul>
+
+          <h4>13. Secure Communications</h4>
+          <ul>
+            <li><strong>Use encrypted messaging:</strong> <input type="text" class="field-input" placeholder="Encrypted comm tool used with team"></li>
+            <li><strong>Signal:</strong> <a href="https://signal.org" target="_blank">Signal</a> for team communications</li>
+            <li><strong>Never discuss cases on cleartext:</strong> No email, SMS, or unencrypted chat</li>
+            <li><strong>PGP for sensitive emails:</strong> <input type="text" class="field-input" placeholder="PGP key ID (if applicable)"></li>
+          </ul>
+
+          <h3>F. Behavioral OPSEC</h3>
+
+          <h4>14. Interaction Patterns</h4>
+          <ul>
+            <li><strong>Never engage directly with target:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">No direct contact policy confirmed</label></li>
+            <li><strong>Avoid "liking" or interacting on social media:</strong> Passive observation only</li>
+            <li><strong>Don't download suspicious files:</strong> Use sandboxes or VMs</li>
+            <li><strong>Be aware of analytics/tracking pixels:</strong> Block in email and websites</li>
+            <li><strong>Randomize search patterns:</strong> Don't follow predictable sequences</li>
+          </ul>
+
+          <h4>15. Timing & Patterns</h4>
+          <ul>
+            <li><strong>Vary investigation times:</strong> <input type="text" class="field-input" placeholder="Schedule variance notes"></li>
+            <li><strong>Don't establish predictable routines:</strong> Vary days, times, and approaches</li>
+            <li><strong>Use delays between queries:</strong> Avoid automated detection</li>
+            <li><strong>Rotate IP addresses periodically:</strong> <input type="text" class="field-input" placeholder="IP rotation schedule"></li>
+          </ul>
+
+          <h3>G. Legal & Ethical Considerations</h3>
+
+          <h4>16. Compliance Checklist</h4>
+          <ul>
+            <li><strong>Know local laws:</strong> <input type="text" class="field-input" placeholder="Relevant laws and regulations reviewed"></li>
+            <li><strong>Respect Terms of Service:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Aware of TOS limitations</label></li>
+            <li><strong>No unauthorized access:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Only using publicly available information</label></li>
+            <li><strong>Document legal basis:</strong> <input type="text" class="field-input" placeholder="Legal authority or client authorization"></li>
+            <li><strong>Data protection compliance:</strong> <input type="text" class="field-input" placeholder="GDPR/CCPA/local privacy law compliance notes"></li>
+          </ul>
+
+          <h4>17. Ethical Guidelines</h4>
+          <ul>
+            <li><strong>Proportionality:</strong> Methods match the severity of investigation</li>
+            <li><strong>Minimize collateral exposure:</strong> Focus only on necessary targets</li>
+            <li><strong>Respect privacy:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Only collecting necessary information</label></li>
+            <li><strong>Report criminal activity:</strong> <input type="checkbox" style="margin-left:10px;"> <label style="display:inline;font-weight:normal;">Aware of reporting obligations</label></li>
+          </ul>
+
+          <h3>H. Pre-Investigation OPSEC Checklist</h3>
+
+          <div class="callout tip">
+            <div>✅ <span class="callout-label">Complete This Checklist Before Starting</span><br>
+              Review and check all items before proceeding with investigation:
+            </div>
+          </div>
+
+          <ul style="list-style:none; margin-left:0;">
+            <li><input type="checkbox" style="margin-right:8px;"><strong>VPN/Tor configured and tested</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>Dedicated browser profile created with privacy extensions</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>WebRTC and location services disabled</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>Burner email account(s) created</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>Persona documented and ready</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>Virtual phone number(s) acquired (if needed)</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>Device encrypted and secured</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>Working from secure physical location</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>Encrypted storage prepared for evidence</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>Screenshot metadata removal tool ready</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>Secure communications channel established with team</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>Legal and ethical compliance reviewed</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>Behavioral OPSEC guidelines understood</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>IP leak test completed successfully</strong></li>
+            <li><input type="checkbox" style="margin-right:8px;"><strong>Emergency shutdown procedure established</strong></li>
+          </ul>
+
+          <div class="callout warn">
+            <div>⚠️ <span class="callout-label">If Any Item is Unchecked</span><br>
+              <strong>DO NOT PROCEED</strong> with the investigation until all OPSEC measures are in place. Your safety and the investigation's integrity depend on proper setup.
+            </div>
+          </div>
+
+          <div class="notes-box" data-section="sec-opsec">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes — OPSEC Setup</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder="Document your complete OPSEC setup: VPN details, persona information, tools configured, any deviations from standard procedure, and risk assessment for this specific investigation."></textarea>
+            <div class="notes-hint">Record all OPSEC measures taken and any special considerations for this case.</div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 2: PRE-ENGAGEMENT -->
+    <section id="sec-1" class="section-card">
+      <details class="section-toggle">
+        <summary class="section-summary">
+          <div class="section-summary-left">
+            <div class="section-icon">🧭</div>
+            <div class="section-title-text">
+              <span class="section-title-main">2. Pre-Engagement</span>
+              <span class="section-title-sub">Define target, environment, and workspace before collecting data.</span>
+            </div>
+          </div>
+          <div class="section-chevron">▼</div>
+        </summary>
+        <div class="section-inner">
+          
+          <h3>2.1 Identify the Target</h3>
+          
+          <h4>A. Company Identity</h4>
+          <ul>
+            <li><strong>Primary domain:</strong> <input type="text" class="field-input" placeholder="Enter primary domain"></li>
+            <li><strong>Secondary/parked domains:</strong> <input type="text" class="field-input" placeholder="Enter secondary domains"></li>
+            <li><strong>Alternate names / DBAs:</strong> <input type="text" class="field-input" placeholder="Enter alternate names"></li>
+            <li><strong>Parent company:</strong> <input type="text" class="field-input" placeholder="Enter parent company"></li>
+            <li><strong>Subsidiaries:</strong> <input type="text" class="field-input" placeholder="Enter subsidiaries"></li>
+            <li><strong>Registered business number:</strong> <input type="text" class="field-input" placeholder="Enter registration number"></li>
+            <li><strong>Jurisdiction of incorporation:</strong> <input type="text" class="field-input" placeholder="Enter jurisdiction"></li>
+            <li><strong>Industry classification (NAICS/SIC):</strong> <input type="text" class="field-input" placeholder="Enter classification"></li>
+          </ul>
+
+          <h4>B. Domain Footprint</h4>
+          <ul>
+            <li><strong>TLD variants:</strong> <input type="text" class="field-input" placeholder="Enter TLD variants"></li>
+            <li><strong>Hosting provider:</strong> <input type="text" class="field-input" placeholder="Enter hosting provider"></li>
+            <li><strong>Known IPs:</strong> <input type="text" class="field-input" placeholder="Enter IP addresses"></li>
+            <li><strong>SSL issuer:</strong> <input type="text" class="field-input" placeholder="Enter SSL issuer"></li>
+            <li><strong>CDN used:</strong> <input type="text" class="field-input" placeholder="Enter CDN"></li>
+            <li><strong>Potential typosquatting variants:</strong> <input type="text" class="field-input" placeholder="Enter typosquatting domains"></li>
+          </ul>
+
+          <h4>C. Addresses & Contact Channels</h4>
+          <ul>
+            <li><strong>Legal address:</strong> <input type="text" class="field-input" placeholder="Enter legal address"></li>
+            <li><strong>Operational address:</strong> <input type="text" class="field-input" placeholder="Enter operational address"></li>
+            <li><strong>Mailing address:</strong> <input type="text" class="field-input" placeholder="Enter mailing address"></li>
+            <li><strong>Support email(s):</strong> <input type="text" class="field-input" placeholder="Enter support emails"></li>
+            <li><strong>Corporate phone number:</strong> <input type="text" class="field-input" placeholder="Enter phone number"></li>
+            <li><strong>Security/abuse contact:</strong> <input type="text" class="field-input" placeholder="Enter security contact"></li>
+          </ul>
+
+          <h4>D. Key People</h4>
+          <ul>
+            <li><strong>Executives:</strong> <input type="text" class="field-input" placeholder="Enter executives"></li>
+            <li><strong>Founders:</strong> <input type="text" class="field-input" placeholder="Enter founders"></li>
+            <li><strong>Board:</strong> <input type="text" class="field-input" placeholder="Enter board members"></li>
+            <li><strong>Corporate officers:</strong> <input type="text" class="field-input" placeholder="Enter corporate officers"></li>
+            <li><strong>Tech and security leads:</strong> <input type="text" class="field-input" placeholder="Enter tech/security leads"></li>
+          </ul>
+
+          <h4>E. Digital Presence</h4>
+       
+                    <ul>
+            <li><strong>LinkedIn:</strong> <input type="text" class="field-input" placeholder="address"></li>
+            <li><strong>Twiter/x:</strong> <input type="text" class="field-input" placeholder="address"></li>
+            <li><strong>Facebook:</strong> <input type="text" class="field-input" placeholder="address"></li>
+            <li><strong>Instagram:</strong> <input type="text" class="field-input" placeholder="address"></li>
+            <li><strong>YouTube:</strong> <input type="text" class="field-input" placeholder="address"></li>
+            <li><strong>Github:</strong> <input type="text" class="field-input" placeholder="address"></li>
+            <li><strong>Hunter.io:</strong> <input type="text" class="field-input" placeholder="address"></li>
+            <li><strong>GoogleMaps:</strong> <input type="text" class="field-input" placeholder="address"></li>
+            <li><strong>other:</strong> <input type="text" class="field-input" placeholder="address"></li>
+          </ul>
+
+          <h4>F. Financial Footprint</h4>
+          <ul>
+            <li><strong>Investors:</strong> <input type="text" class="field-input" placeholder="Enter investors"></li>
+            <li><strong>VC partners:</strong> <input type="text" class="field-input" placeholder="Enter VC partners"></li>
+            <li><strong>Payment processors (if public):</strong> <input type="text" class="field-input" placeholder="Enter payment processors"></li>
+          </ul>
+
+          <h4>G. Security & Reputation Context</h4>
+          <ul>
+            <li><strong>Prior breaches:</strong> <input type="text" class="field-input" placeholder="Enter breach information"></li>
+            <li><strong>Regulatory obligations:</strong> <input type="text" class="field-input" placeholder="Enter regulatory obligations"></li>
+            <li><strong>Known phishing domains:</strong> <input type="text" class="field-input" placeholder="Enter phishing domains"></li>
+            <li><strong>Brand impersonation attempts:</strong> <input type="text" class="field-input" placeholder="Enter impersonation details"></li>
+          </ul>
+
+          <h3>2.2 Prepare Workspace</h3>
+          <p>Create the following directory structure for your investigation:</p>
+          <pre><code>/CaseName/
+  /Screenshots/
+  /Findings/
+  /Evidence/
+  /Reports/</code></pre>
+
+          <div class="notes-box" data-section="sec-1">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes — Pre-Engagement</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder="Record scope, client constraints, time-boxing, and any assumptions here."></textarea>
+            <div class="notes-hint">Document your initial target information and workspace setup.</div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 3: CORPORATE FOOTPRINT -->
+    <section id="sec-mod1" class="section-card">
+      <details class="section-toggle">
+        <summary class="section-summary">
+          <div class="section-summary-left">
+            <div class="section-icon">🌐</div>
+            <div class="section-title-text">
+              <span class="section-title-main">3. Corporate Footprint Discovery</span>
+              <span class="section-title-sub">WHOIS, DNS, CT logs, tech stack, and historical website behaviour.</span>
+            </div>
+          </div>
+          <div class="section-chevron">▼</div>
+        </summary>
+        <div class="section-inner">
+          
+          <h3>3.1 WHOIS & Domain Registration</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">WHOIS Tools</span><br>
+              <a href="https://who.is" target="_blank">WHO.IS</a> •
+              <a href="https://lookup.icann.org/en" target="_blank">ICANN Lookup</a> •
+              <a href="https://securitytrails.com" target="_blank">SecurityTrails</a> •
+              <a href="https://whoisfreaks.com" target="_blank">WhoisFreaks</a> •
+              <a href="https://www.whoxy.com" target="_blank">Whoxy</a> •
+              <a href="https://whoisxmlapi.com" target="_blank">WhoisXML API</a> •
+              <a href="https://whois.domaintools.com" target="_blank">DomainTools</a> •
+              <a href="https://viewdns.info" target="_blank">ViewDNS</a> •
+              <a href="https://hackertarget.com/whois-lookup" target="_blank">HackerTarget WHOIS</a> •
+              <a href="https://www.dotcom-tools.com/whois" target="_blank">Dotcom-Tools WHOIS</a>
+            </div>
+          </div>
+
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Reputation Enrichment</span><br>
+              <a href="https://www.scamadviser.com" target="_blank">Scamadviser</a> •
+              <a href="https://talosintelligence.com/reputation_center" target="_blank">Cisco Talos Intelligence</a> •
+              <a href="https://otx.alienvault.com" target="_blank">AlienVault OTX</a>
+            </div>
+          </div>
+
+          <h4>Extract From WHOIS:</h4>
+          <ul>
+            <li><strong>Domain age:</strong> <input type="text" class="field-input" placeholder="Enter domain age"></li>
+            <li><strong>Registrant org:</strong> <input type="text" class="field-input" placeholder="Enter registrant organization"></li>
+            <li><strong>Ownership history:</strong> <input type="text" class="field-input" placeholder="Enter ownership history"></li>
+            <li><strong>NS history:</strong> <input type="text" class="field-input" placeholder="Enter nameserver history"></li>
+            <li><strong>Registrar reputation:</strong> <input type="text" class="field-input" placeholder="Enter registrar reputation"></li>
+            <li><strong>DNSSEC status:</strong> <input type="text" class="field-input" placeholder="Enter DNSSEC status"></li>
+            <li><strong>Prior malicious activity:</strong> <input type="text" class="field-input" placeholder="Enter malicious activity history"></li>
+          </ul>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+          <div class="callout warn">
+            <div><span class="callout-label">Red Flags</span><br>
+              <span class="red-flag">• New domain (&lt;6 months)</span><br>
+              <span class="red-flag">• Frequent ownership changes</span><br>
+              <span class="red-flag">• Anonymous registrants with shady patterns</span><br>
+              <span class="red-flag">• Previously malicious IP blocks</span><br>
+              <span class="red-flag">• Offshore registrar patterns</span>
+            </div>
+          </div>
+        </details>
+
+          <h3>3.2 DNS & Subdomain Enumeration</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">DNS Tools</span><br>
+              <a href="https://dnsdumpster.com" target="_blank">DNSDumpster</a>
+            </div>
+          </div>
+
+          <h4>Extract:</h4>
+          <ul>
+            <li><strong>Subdomains:</strong> <input type="text" class="field-input" placeholder="Enter subdomains found"></li>
+            <li><strong>MX/TXT/SPF/DMARC records:</strong> <input type="text" class="field-input" placeholder="Enter DNS records"></li>
+            <li><strong>Mail servers:</strong> <input type="text" class="field-input" placeholder="Enter mail servers"></li>
+            <li><strong>IP addresses:</strong> <input type="text" class="field-input" placeholder="Enter IP addresses"></li>
+          </ul>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+<div class="callout warn">
+  <div><span class="callout-label">Red Flags</span><br>
+    <span class="red-flag">• Exposed admin interfaces (admin., cpanel., portal.)</span><br>
+    <span class="red-flag">• Public dev/staging/test environments (dev., staging., qa.)</span><br>
+    <span class="red-flag">• Subdomains pointing to internal systems (vpn., intranet., rdp.)</span><br>
+    <span class="red-flag">• Legacy or abandoned subdomains still online</span><br>
+    <span class="red-flag">• Orphaned cloud resources → subdomain takeover risk</span><br>
+    <span class="red-flag">• Wildcard DNS records exposing large unmanaged surface</span><br>
+    <span class="red-flag">• Hosting inconsistencies across subdomains</span><br>
+    <span class="red-flag">• MX/TXT records leaking internal data or emails</span><br>
+    <span class="red-flag">• Missing or weak DNS security: SPF/DKIM/DMARC/DNSSEC</span><br>
+    <span class="red-flag">• SPF set to “+all” or overly permissive settings</span><br>
+    <span class="red-flag">• DNS entries resolving to known malicious IPs</span>
+  </div>
+</div>
+</details>
+
+          <h3>3.3 Certificate Transparency Enumeration</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">CT Log Tools</span><br>
+              <a href="https://crt.sh" target="_blank">CRT.sh</a>
+            </div>
+          </div>
+
+          <h4>Look for:</h4>
+          <ul>
+            <li><strong>Hidden subdomains:</strong> <input type="text" class="field-input" placeholder="Enter hidden subdomains"></li>
+            <li><strong>Legacy infrastructure:</strong> <input type="text" class="field-input" placeholder="Enter legacy infrastructure"></li>
+            <li><strong>Dev/internal hostnames:</strong> <input type="text" class="field-input" placeholder="Enter dev/internal hostnames"></li>
+          </ul>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+          <div class="callout warn">
+  <div> <span class="callout-label">Red Flags</span><br>
+    <span class="red-flag">• Unexpected subdomains appearing in CT logs</span><br>
+    <span class="red-flag">• Internal or development hostnames exposed (dev., internal., staging.)</span><br>
+    <span class="red-flag">• Certificates issued for domains the company does not publicly own</span><br>
+    <span class="red-flag">• Sudden spike in certificates → possible malicious issuance</span><br>
+    <span class="red-flag">• Certificates issued by low-reputation or unknown CAs</span><br>
+    <span class="red-flag">• Certificates covering legacy or abandoned infrastructure</span><br>
+    <span class="red-flag">• Wildcard certificates paired with inconsistent governance</span><br>
+    <span class="red-flag">• Certificates with anomalous SAN entries (unexpected domains)</span><br>
+    <span class="red-flag">• Very short-lived certificates → automation errors or suspicious rotation</span><br>
+    <span class="red-flag">• CT logs showing domains linked to known malicious activity</span>
+  </div>
+</div>
+</details>
+
+          <h3>3.4 Technology Stack Fingerprinting</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Tech Stack Tools</span><br>
+              <a href="https://builtwith.com" target="_blank">BuiltWith</a> •
+              <a href="https://www.wappalyzer.com" target="_blank">Wappalyzer</a>
+            </div>
+          </div>
+
+          <h4>Extract:</h4>
+          <ul>
+            <li><strong>CMS (WordPress, Drupal, etc.):</strong> <input type="text" class="field-input" placeholder="Enter CMS"></li>
+            <li><strong>Server tech (Apache, Nginx, IIS):</strong> <input type="text" class="field-input" placeholder="Enter server technology"></li>
+            <li><strong>Hosting/CDN (Cloudflare, AWS, etc.):</strong> <input type="text" class="field-input" placeholder="Enter hosting/CDN"></li>
+            <li><strong>Analytics (Google Analytics, etc.):</strong> <input type="text" class="field-input" placeholder="Enter analytics tools"></li>
+            <li><strong>Frameworks (React, Angular, etc.):</strong> <input type="text" class="field-input" placeholder="Enter frameworks"></li>
+          </ul>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+          <div class="callout warn">
+  <div><span class="callout-label">Red Flags</span><br>
+    <span class="red-flag">• Outdated CMS versions (e.g., old WordPress, Drupal, Joomla)</span><br>
+    <span class="red-flag">• Unsupported or end-of-life technologies (PHP 5.x, Python 2.x)</span><br>
+    <span class="red-flag">• Known-vulnerable frameworks or libraries detected</span><br>
+    <span class="red-flag">• Multiple analytics/marketing trackers indicating poor governance</span><br>
+    <span class="red-flag">• Mixed hosting infrastructure (e.g., Cloudflare + unknown VPS)</span><br>
+    <span class="red-flag">• Use of outdated or insecure server software (Apache/Nginx/IIS)</span><br>
+    <span class="red-flag">• Exposure of admin pages or backend endpoints via tech-stack leaks</span><br>
+    <span class="red-flag">• Technologies inconsistent with the company’s claimed size/maturity</span><br>
+    <span class="red-flag">• Debug or development frameworks visible in production</span><br>
+    <span class="red-flag">• Third-party scripts from high-risk or unknown domains</span>
+  </div>
+</div>
+</details>
+
+          <h3>3.5 Historical Website Analysis</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Archive Tools</span><br>
+              <a href="https://archive.org/web" target="_blank">Wayback Machine</a>
+            </div>
+          </div>
+
+          <h4>Look for:</h4>
+          <ul>
+            <li><strong>Backup Dates:</strong> <input type="text" class="field-input" placeholder="Enter findings"></li>
+            <li><strong>Major Changes in Branding:</strong> <input type="text" class="field-input" placeholder="Enter findings"></li>
+            <li><strong>Major Changes in Site Design:</strong> <input type="text" class="field-input" placeholder="Enter findings"></li>
+            <li><strong>Other:</strong> <input type="text" class="field-input" placeholder="Enter findings"></li>
+          </ul>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+<div class="callout warn">
+  <div><span class="callout-label">Red Flags</span><br>
+    <span class="red-flag">• Sudden removal of team or leadership pages</span><br>
+    <span class="red-flag">• Deleted careers pages indicating halted growth or instability</span><br>
+    <span class="red-flag">• Major business pivots without public explanation</span><br>
+    <span class="red-flag">• Frequent website redesigns masking identity or ownership changes</span><br>
+    <span class="red-flag">• Removal of security-related pages (security.txt, policies)</span><br>
+    <span class="red-flag">• Historical claims or achievements no longer referenced</span><br>
+    <span class="red-flag">• Old versions exposing internal directories or admin interfaces</span><br>
+    <span class="red-flag">• Evidence of previously hosted malicious or fraudulent content</span><br>
+    <span class="red-flag">• Abrupt domain redirects in archived snapshots</span><br>
+    <span class="red-flag">• Archived pages showing contradictory or falsified company information</span>
+  </div>
+</div>
+</details>
+
+
+          <div class="notes-box" data-section="sec-mod1">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint"></div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 4: CYBER RISK & SECURITY HYGIENE -->
+    <section id="sec-mod2" class="section-card">
+      <details class="section-toggle">
+        <summary class="section-summary">
+          <div class="section-summary-left">
+            <div class="section-icon">🛡️</div>
+            <div class="section-title-text">
+              <span class="section-title-main">4. Cyber Risk & Security Hygiene</span>
+              <span class="section-title-sub">External exposure, misconfigurations, breaches, and blacklist status.</span>
+            </div>
+          </div>
+          <div class="section-chevron">▼</div>
+        </summary>
+        <div class="section-inner">
+          
+          <h3>4.1 Exposure & Attack Surface Discovery</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Attack Surface Tools</span><br>
+              <a href="https://www.shodan.io" target="_blank">Shodan</a> •
+              <a href="https://search.censys.io" target="_blank">Censys</a> •
+              <a href="https://www.onyphe.io" target="_blank">Onyphe</a> •
+              <a href="https://pulsedive.com" target="_blank">Pulsedive</a>
+            </div>
+          </div>
+
+          <h4>Search Patterns:</h4>
+          <pre><code>"company.com"
+"company.com" ssl:"company.com"
+Hostnames
+IP ranges
+ASN</code></pre>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+          <div class="callout warn">
+            <div><span class="callout-label">Red Flags</span><br>
+              <span class="red-flag">• Exposed RDP / VNC</span><br>
+              <span class="red-flag">• Exposed MySQL/Mongo/Elastic</span><br>
+              <span class="red-flag">• Exposed Jenkins/GitLab</span><br>
+              <span class="red-flag">• ICS systems</span><br>
+              <span class="red-flag">• Outdated SSL/SSH</span>
+            </div>
+          </div>
+        </details>
+
+
+          <div class="notes-box" data-section="sec-mod2">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+          <h3>4.2 Web Security Configuration</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Security Header Tools</span><br>
+              <a href="https://securityheaders.com" target="_blank">SecurityHeaders</a> •
+              <a href="https://observatory.mozilla.org" target="_blank">Mozilla Observatory</a> •
+              <a href="https://detectify.com" target="_blank">Detectify</a>
+            </div>
+          </div>
+
+          <h4>Check:</h4>
+          <ul>
+            <li><strong>CSP (Content Security Policy):</strong> <input type="text" class="field-input" placeholder="Enter CSP status/findings"></li>
+            <li><strong>X-Frame-Options:</strong> <input type="text" class="field-input" placeholder="Enter X-Frame-Options status"></li>
+            <li><strong>HSTS (HTTP Strict Transport Security):</strong> <input type="text" class="field-input" placeholder="Enter HSTS status"></li>
+            <li><strong>Referrer-Policy:</strong> <input type="text" class="field-input" placeholder="Enter Referrer-Policy status"></li>
+            <li><strong>X-Content-Type-Options:</strong> <input type="text" class="field-input" placeholder="Enter X-Content-Type-Options status"></li>
+          </ul>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn"> 
+    <div> <span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Missing or weak Content Security Policy (CSP)</span><br>
+      <span class="red-flag">• No X-Frame-Options → Clickjacking vulnerability</span><br>
+      <span class="red-flag">• HSTS not enabled or configured incorrectly</span><br>
+      <span class="red-flag">• Missing Referrer-Policy allowing sensitive data leakage</span><br>
+      <span class="red-flag">• Missing X-Content-Type-Options → MIME sniffing risk</span><br>
+      <span class="red-flag">• Mixed-content issues (loading HTTP assets on HTTPS site)</span><br>
+      <span class="red-flag">• Debug headers or verbose server banners exposed</span><br>
+      <span class="red-flag">• Security header scores “F” or “D” on scanners</span><br>
+      <span class="red-flag">• Web server reveals internal IPs or environment details</span><br>
+      <span class="red-flag">• Outdated or insecure CMS/plugins flagged by scanners</span>
+    </div>
+  </div>
+
+</details>
+
+
+
+          <h3>4.3 SSL/TLS Strength Test</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">SSL/TLS Tools</span><br>
+              <a href="https://www.ssllabs.com/ssltest" target="_blank">SSL Labs HTTPS Test</a> •
+              <a href="https://search.censys.io" target="_blank">Censys Certificates</a> •
+              <a href="https://www.ssllabs.com/ssltest/analyze.html" target="_blank">Qualys CertView</a>
+            </div>
+          </div>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+          <div class="callout warn">
+            <div><span class="callout-label">Red Flags</span><br>
+              <span class="red-flag">• TLS 1.0/1.1 support</span><br>
+              <span class="red-flag">• Weak ciphers</span><br>
+              <span class="red-flag">• Self-signed certs on production</span><br>
+              <span class="red-flag">• Expired/mismatched certs</span>
+            </div>
+          </div>
+        </details>
+
+            <div class="notes-box" data-section="sec-mod3">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+          <h3>4.4 Breach & Credential Exposure</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Breach Intelligence Tools</span><br>
+              <a href="https://haveibeenpwned.com" target="_blank">HaveIBeenPwned</a> •
+              <a href="https://breachdirectory.org" target="_blank">BreachDirectory</a> •
+              <a href="https://intelx.io" target="_blank">Intelligence X</a> •
+              <a href="https://pastebin.com/search" target="_blank">Pastebin Search</a>
+            </div>
+          </div>
+
+          <h4>Google Dorks:</h4>
+          <pre><code>"@company.com" "password"
+"@company.com" "leaked"
+site:pastebin.com "@company.com"</code></pre>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div>⚠️ <span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Company emails found in major breach databases</span><br>
+      <span class="red-flag">• Plaintext or weak passwords exposed in dumps</span><br>
+      <span class="red-flag">• Executive or privileged accounts appearing in leaks</span><br>
+      <span class="red-flag">• Multiple credential exposures across different breaches</span><br>
+      <span class="red-flag">• Recent breach activity indicating active compromise</span><br>
+      <span class="red-flag">• Pastebin/ghostbin posts referencing internal data</span><br>
+      <span class="red-flag">• Credentials tied to cloud services or admin panels</span><br>
+      <span class="red-flag">• Password reuse patterns across accounts</span><br>
+      <span class="red-flag">• Leaked credentials associated with malware campaigns</span><br>
+      <span class="red-flag">• Evidence of targeted phishing towards the company</span>
+    </div>
+  </div>
+
+</details>
+
+          <div class="notes-box" data-section="sec-mod4">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+
+
+
+          <h3>4.5 Malware, Phishing & Threat Intel</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Threat Intelligence Tools</span><br>
+              <a href="https://www.virustotal.com" target="_blank">VirusTotal</a> •
+              <a href="https://otx.alienvault.com" target="_blank">AlienVault OTX</a> •
+              <a href="https://urlscan.io" target="_blank">URLScan.io</a> •
+              <a href="https://www.abuseipdb.com" target="_blank">AbuseIPDB</a> •
+              <a href="https://phishtank.org" target="_blank">PhishTank</a>
+            </div>
+          </div>
+
+          <h4>Look for:</h4>
+          <ul>
+            <li><strong>Malicious verdicts:</strong> <input type="text" class="field-input" placeholder="Enter malicious verdicts found"></li>
+            <li><strong>C2 (Command & Control) links:</strong> <input type="text" class="field-input" placeholder="Enter C2 findings"></li>
+            <li><strong>Blacklists:</strong> <input type="text" class="field-input" placeholder="Enter blacklist status"></li>
+            <li><strong>Malware associations:</strong> <input type="text" class="field-input" placeholder="Enter malware associations"></li>
+          </ul>
+
+          <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Domain or subdomains flagged as malicious on threat intel platforms</span><br>
+      <span class="red-flag">• IPs associated with malware C2 (Command & Control) infrastructure</span><br>
+      <span class="red-flag">• High number of “malicious” or “suspicious” votes on VirusTotal</span><br>
+      <span class="red-flag">• URLs from the organization appearing on phishing blocklists</span><br>
+      <span class="red-flag">• Domain involved in spam or bulk phishing campaigns</span><br>
+      <span class="red-flag">• Malware sandbox reports referencing company assets</span><br>
+      <span class="red-flag">• Known associations with botnets or compromised hosts</span><br>
+      <span class="red-flag">• Abnormal traffic patterns or unusual SSL certificates detected</span><br>
+      <span class="red-flag">• Threat actor chatter mentioning the company on open sources</span><br>
+      <span class="red-flag">• Indicators of active exploitation attempts against the domain</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <h3>4.6 Email Security Checks</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Email Security Tools</span><br>
+              <a href="https://mxtoolbox.com/MXLookup.aspx" target="_blank">MXToolbox MX Check</a> •
+              <a href="https://mxtoolbox.com/blacklists.aspx" target="_blank">MXToolbox Blacklists</a>
+            </div>
+          </div>
+
+          <h4>Verify:</h4>
+          <ul>
+            <li><strong>SPF (Sender Policy Framework):</strong> <input type="text" class="field-input" placeholder="Enter SPF status/findings"></li>
+            <li><strong>DKIM (DomainKeys Identified Mail):</strong> <input type="text" class="field-input" placeholder="Enter DKIM status/findings"></li>
+            <li><strong>DMARC (Domain-based Message Authentication):</strong> <input type="text" class="field-input" placeholder="Enter DMARC status/findings"></li>
+          </ul>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• SPF record missing or set to “+all” (completely spoofable)</span><br>
+      <span class="red-flag">• DKIM not configured or using weak/legacy key sizes</span><br>
+      <span class="red-flag">• DMARC record missing or set to “none” (no enforcement)</span><br>
+      <span class="red-flag">• DMARC policy not aligned with SPF/DKIM identifiers</span><br>
+      <span class="red-flag">• MX records pointing to outdated or insecure mail servers</span><br>
+      <span class="red-flag">• Mail servers with open relay configuration risk</span><br>
+      <span class="red-flag">• Email infrastructure hosted on high-risk or unknown ASNs</span><br>
+      <span class="red-flag">• No DNSSEC → increased susceptibility to spoofing/tampering</span><br>
+      <span class="red-flag">• Domain frequently appearing in email spoofing/phishing reports</span><br>
+      <span class="red-flag">• Missing BIMI record when expected for brand-verifiable companies</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <h3>4.7 Blacklist Checks</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Blacklist Tools</span><br>
+              <a href="https://mxtoolbox.com/blacklists.aspx" target="_blank">MXToolbox Blacklists</a> •
+              <a href="https://talosintelligence.com/reputation_center" target="_blank">Cisco Talos</a> •
+              <a href="https://www.virustotal.com" target="_blank">VirusTotal</a>
+            </div>
+          </div>
+
+          <div class="notes-box" data-section="sec-mod5">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Document security posture, exposed services, and breach history.</div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 5: LEGITIMACY & FINANCIAL HISTORY -->
+    <section id="sec-mod3" class="section-card">
+      <details class="section-toggle">
+        <summary class="section-summary">
+          <div class="section-summary-left">
+            <div class="section-icon">📜</div>
+            <div class="section-title-text">
+              <span class="section-title-main">5. Corporate Legitimacy & Financial History</span>
+              <span class="section-title-sub">Registration, filings, litigation, sanctions, ownership, funding, and addresses.</span>
+            </div>
+          </div>
+          <div class="section-chevron">▼</div>
+        </summary>
+        <div class="section-inner">
+          
+          <h3>5.1 Corporate Registration Verification</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Corporate Registry Tools</span><br>
+              <a href="https://opencorporates.com" target="_blank">OpenCorporates</a> •
+              <a href="https://www.sec.gov/edgar" target="_blank">SEC EDGAR</a> •
+              <a href="https://find-and-update.company-information.service.gov.uk" target="_blank">Companies House (UK)</a> •
+              <a href="https://europa.eu/european-union/online-services_en" target="_blank">EU Business Register</a> •
+              <a href="https://ised-isde.canada.ca" target="_blank">Canadian Corporations</a> •
+              <a href="https://connectonline.asic.gov.au" target="_blank">Australian ASIC</a> •
+              <a href="https://www.acra.gov.sg" target="_blank">Singapore ACRA</a> •
+              <a href="https://www.icris.cr.gov.hk" target="_blank">Hong Kong CR</a>
+            </div>
+          </div>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• No corporate registry record found for the company</span><br>
+      <span class="red-flag">• Recently incorporated (very young company with no history)</span><br>
+      <span class="red-flag">• Company listed as “Dissolved,” “Struck Off,” or “Inactive”</span><br>
+      <span class="red-flag">• Frequent or suspicious changes in ownership or directors</span><br>
+      <span class="red-flag">• Registered address belongs to mail drops or mass company formations</span><br>
+      <span class="red-flag">• Company name mismatch across official sources (registry vs website)</span><br>
+      <span class="red-flag">• No filed annual reports or financial statements where required</span><br>
+      <span class="red-flag">• Corporate officers who appear in many unrelated companies (shell indicators)</span><br>
+      <span class="red-flag">• Registration in known secrecy/tax haven jurisdictions without clear reason</span><br>
+      <span class="red-flag">• Missing or invalid business ID, EIN, or registration number</span>
+    </div>
+  </div>
+
+</details>
+
+          <div class="notes-box" data-section="sec-mod6">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+
+          <h3>5.2 Corporate Identity Consistency</h3>
+          
+          <h4>Cross-check:</h4>
+          <ul>
+            <li><strong>Legal name:</strong> <input type="text" class="field-input" placeholder="Enter legal name verification"></li>
+            <li><strong>WHOIS data:</strong> <input type="text" class="field-input" placeholder="Enter WHOIS consistency check"></li>
+            <li><strong>LinkedIn org page:</strong> <input type="text" class="field-input" placeholder="Enter LinkedIn verification"></li>
+            <li><strong>Press releases:</strong> <input type="text" class="field-input" placeholder="Enter press release verification"></li>
+            <li><strong>Website claims:</strong> <input type="text" class="field-input" placeholder="Enter website claims verification"></li>
+          </ul>
+
+          <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Legal business name differs from website or marketing materials</span><br>
+      <span class="red-flag">• WHOIS ownership or organization name does not match registry data</span><br>
+      <span class="red-flag">• LinkedIn company page lists different locations or corporate details</span><br>
+      <span class="red-flag">• Inconsistent founding dates across different sources</span><br>
+      <span class="red-flag">• Mismatch in executive names between website, registry, and LinkedIn</span><br>
+      <span class="red-flag">• Press releases referencing a different legal business name</span><br>
+      <span class="red-flag">• Multiple unrelated entities using the same physical address</span><br>
+      <span class="red-flag">• Phone numbers or emails that do not align with official records</span><br>
+      <span class="red-flag">• Frequent rebranding without documented acquisition or restructuring</span><br>
+      <span class="red-flag">• Company claims not backed by public/legal documentation</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <h3>5.3 Financial Filing Analysis</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Filing Tools</span><br>
+              <a href="https://www.sec.gov/edgar" target="_blank">SEC EDGAR filings</a> •
+              <a href="https://find-and-update.company-information.service.gov.uk" target="_blank">Companies House filings</a>
+            </div>
+          </div>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• No financial filings available despite legal requirement</span><br>
+      <span class="red-flag">• Filings showing repeated losses or severe negative cash flow</span><br>
+      <span class="red-flag">• Dormant or inactive company filings despite active operations claimed</span><br>
+      <span class="red-flag">• Frequent or unexplained changes in accountants or auditors</span><br>
+      <span class="red-flag">• Auditor warnings, qualifications, or adverse audit opinions</span><br>
+      <span class="red-flag">• Large discrepancies between filings and public claims/press releases</span><br>
+      <span class="red-flag">• Sudden drop in assets, revenue, or employee count</span><br>
+      <span class="red-flag">• Filings indicating legal investigations, sanctions, or penalties</span><br>
+      <span class="red-flag">• Evidence of shell behavior (minimal assets, low activity, few employees)</span><br>
+      <span class="red-flag">• Significant debt accumulation with no clear repayment capacity</span>
+    </div>
+  </div>
+
+</details>
+
+          <div class="notes-box" data-section="sec-mod7">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+          <h3>5.4 Litigation Search</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Court Records Tools</span><br>
+              <a href="https://www.courtlistener.com" target="_blank">CourtListener</a> •
+              <a href="https://pacer.uscourts.gov" target="_blank">PACER</a> •
+              <a href="https://dockets.justia.com" target="_blank">Justia</a>
+            </div>
+          </div>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Company involved in multiple recent lawsuits</span><br>
+      <span class="red-flag">• Litigation related to fraud, deception, or regulatory violations</span><br>
+      <span class="red-flag">• Executives named in personal or professional misconduct cases</span><br>
+      <span class="red-flag">• Lawsuits involving customers, partners, or employees alleging harm</span><br>
+      <span class="red-flag">• Company listed in regulatory enforcement actions or investigations</span><br>
+      <span class="red-flag">• Repeated disputes over contracts, payments, or intellectual property</span><br>
+      <span class="red-flag">• Bankruptcy filings, insolvency claims, or court-appointed oversight</span><br>
+      <span class="red-flag">• Litigation across multiple jurisdictions with unclear reasoning</span><br>
+      <span class="red-flag">• Legal cases tied to cybersecurity incidents or data breaches</span><br>
+      <span class="red-flag">• Settlements sealed or undisclosed, indicating high-risk legal exposure</span>
+    </div>
+  </div>
+
+</details>
+
+
+                    <div class="notes-box" data-section="sec-mod8">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+          <h3>5.5 Sanctions & Compliance Screening</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Sanctions Screening Tools</span><br>
+              <a href="https://sanctionssearch.ofac.treas.gov" target="_blank">OFAC SDN List</a> •
+              <a href="https://www.sanctionsmap.eu" target="_blank">EU Sanctions Map</a> •
+              <a href="https://www.un.org/securitycouncil/sanctions/information" target="_blank">UN Consolidated List</a> •
+              <a href="https://www.interpol.int/How-we-work/Notices" target="_blank">Interpol Notices</a>
+            </div>
+          </div>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Company or individuals appearing on OFAC, EU, UN, UK, or Interpol lists</span><br>
+      <span class="red-flag">• Related parties, suppliers, or subsidiaries tied to sanctioned entities</span><br>
+      <span class="red-flag">• Operations in embargoed countries without clear justification</span><br>
+      <span class="red-flag">• Business relationships with organizations flagged for AML/KYC failures</span><br>
+      <span class="red-flag">• Payments routed through high-risk financial jurisdictions</span><br>
+      <span class="red-flag">• Evidence of shell companies used to obscure beneficial ownership</span><br>
+      <span class="red-flag">• Company officers classified as PEPs (Politically Exposed Persons)</span><br>
+      <span class="red-flag">• Prior enforcement actions for export control violations (ITAR/EAR)</span><br>
+      <span class="red-flag">• Compliance lapses documented by regulators or industry watchdogs</span><br>
+      <span class="red-flag">• Unverified or contradictory compliance certifications</span>
+    </div>
+  </div>
+
+</details>
+
+          <div class="notes-box" data-section="sec-mod9">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+          <h3>5.6 Beneficial Ownership Verification</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Ownership Tools</span><br>
+              <a href="https://opencorporates.com" target="_blank">OpenCorporates networks</a> •
+              <a href="https://www.gov.uk/guidance/people-with-significant-control-pscs" target="_blank">UK PSC Register</a>
+            </div>
+          </div>
+
+          <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• True beneficial owners cannot be identified through public records</span><br>
+      <span class="red-flag">• Complex ownership chains with multiple shell companies</span><br>
+      <span class="red-flag">• Ownership routed through tax havens or secrecy jurisdictions</span><br>
+      <span class="red-flag">• Corporate officers listed are nominees or “front” individuals</span><br>
+      <span class="red-flag">• Frequent changes in owners, shareholders, or corporate controllers</span><br>
+      <span class="red-flag">• Beneficial owners appear involved in multiple unrelated companies</span><br>
+      <span class="red-flag">• Ownership connected to sanctioned individuals or high-risk persons</span><br>
+      <span class="red-flag">• Missing or incomplete UBO (Ultimate Beneficial Owner) disclosures</span><br>
+      <span class="red-flag">• Mismatch between declared owners and those shown in legal filings</span><br>
+      <span class="red-flag">• Beneficial owners have history of fraud, litigation, or regulatory violations</span>
+    </div>
+  </div>
+
+</details>
+
+
+
+          <div class="notes-box" data-section="sec-mod10">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder="S"></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+
+          <h3>5.7 Funding & Investment Verification</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Funding Intelligence Tools</span><br>
+              <a href="https://www.crunchbase.com" target="_blank">Crunchbase</a> •
+              <a href="https://pitchbook.com" target="_blank">PitchBook</a> •
+              <a href="https://www.prnewswire.com" target="_blank">PRNewswire</a> •
+              <a href="https://www.businesswire.com" target="_blank">BusinessWire</a>
+            </div>
+          </div>
+
+          <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Company claims funding that cannot be verified through reliable sources</span><br>
+      <span class="red-flag">• Investors or venture firms do not list the company in their portfolios</span><br>
+      <span class="red-flag">• Sudden loss of major investors without public explanation</span><br>
+      <span class="red-flag">• Funding comes from unknown, opaque, or high-risk investment entities</span><br>
+      <span class="red-flag">• Invested amounts inconsistent with company size, revenue, or headcount</span><br>
+      <span class="red-flag">• Company fundraising announcements differ from regulatory filings</span><br>
+      <span class="red-flag">• Investors previously linked to fraud, sanctions, or illicit activity</span><br>
+      <span class="red-flag">• Mismatch between claimed funding rounds and Crunchbase/CBInsights data</span><br>
+      <span class="red-flag">• Repeated failed funding attempts or abandoned investor commitments</span><br>
+      <span class="red-flag">• Use of crowdfunding platforms instead of institutional investors (context-dependent)</span>
+    </div>
+  </div>
+
+</details>
+
+          <div class="notes-box" data-section="sec-mod11">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+
+          <h3>5.8 Corporate Address Verification</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Address Verification Tools</span><br>
+              <a href="https://maps.google.com" target="_blank">Google Maps</a> •
+              <a href="https://www.google.com/maps/@" target="_blank">Street View</a> •
+              <a href="https://tineye.com" target="_blank">TinEye (reverse image search)</a> •
+              <a href="https://images.google.com" target="_blank">Google Images</a>
+            </div>
+          </div>
+
+          <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Address is a virtual office, mailbox center, or co-working space without disclosure</span><br>
+      <span class="red-flag">• Multiple unrelated companies registered at the same address</span><br>
+      <span class="red-flag">• No signage, office space, or operational evidence at the physical location</span><br>
+      <span class="red-flag">• Address listed differs across registry, website, and corporate documents</span><br>
+      <span class="red-flag">• PO boxes used as a “headquarters” address</span><br>
+      <span class="red-flag">• Address located in high-risk or secrecy jurisdictions</span><br>
+      <span class="red-flag">• Address changes frequently within a short time period</span><br>
+      <span class="red-flag">• Google Maps or Street View shows vacant buildings or inconsistent activity</span><br>
+      <span class="red-flag">• Residential property listed as a corporate headquarters (context-dependent)</span><br>
+      <span class="red-flag">• Satellite offices or foreign branches with no verifiable presence</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <div class="notes-box" data-section="sec-mod12">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Document registration status, legal history, and ownership structure.</div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 6: PEOPLE OSINT -->
+    <section id="sec-mod4" class="section-card">
+      <details class="section-toggle">
+        <summary class="section-summary">
+          <div class="section-summary-left">
+            <div class="section-icon">👥</div>
+            <div class="section-title-text">
+              <span class="section-title-main">6. People OSINT</span>
+              <span class="section-title-sub">Executives, employees, developers, and their digital footprints.</span>
+            </div>
+          </div>
+          <div class="section-chevron">▼</div>
+        </summary>
+        <div class="section-inner">
+          
+          <h3>6.1 Executive Verification</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Executive Verification Tools</span><br>
+              <a href="https://www.linkedin.com" target="_blank">LinkedIn</a> •
+              <a href="https://www.crunchbase.com" target="_blank">Crunchbase</a> •
+              <a href="https://pimeyes.com" target="_blank">PimEyes</a> •
+              <a href="https://facecheck.id" target="_blank">FaceCheck</a> •
+              <a href="https://tineye.com" target="_blank">TinEye</a>
+            </div>
+          </div>
+
+
+
+
+          <h4>Verify:</h4>
+          <ul>
+            <li><strong>Executive profiles match claimed positions:</strong> <input type="text" class="field-input" placeholder="Enter verification results"></li>
+            <li><strong>Photos are consistent across platforms:</strong> <input type="text" class="field-input" placeholder="Enter photo consistency check"></li>
+            <li><strong>Career history is legitimate:</strong> <input type="text" class="field-input" placeholder="Enter career history verification"></li>
+            <li><strong>No evidence of AI-generated profiles:</strong> <input type="text" class="field-input" placeholder="Enter AI-profile check results"></li>
+          </ul>
+
+                    <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div>⚠️ <span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Executive’s identity cannot be verified across major platforms (LinkedIn, registry, press)</span><br>
+      <span class="red-flag">• Executive listed on the website but missing from corporate registry filings</span><br>
+      <span class="red-flag">• Inconsistent job titles or employment history across public sources</span><br>
+      <span class="red-flag">• Executive has history of involvement in failed or fraudulent companies</span><br>
+      <span class="red-flag">• No digital footprint despite claiming senior leadership roles</span><br>
+      <span class="red-flag">• Executive photo appears to be AI-generated or taken from stock images</span><br>
+      <span class="red-flag">• Connections on LinkedIn are extremely sparse or suspiciously generic</span><br>
+      <span class="red-flag">• Executive linked to high-risk individuals, sanctioned entities, or shell operations</span><br>
+      <span class="red-flag">• Frequent role changes across unrelated industries without documentation</span><br>
+      <span class="red-flag">• Executive appears on scam-reporting or consumer-warning databases</span>
+    </div>
+  </div>
+
+</details>
+
+          <h3>6.2 Employee Footprint Analysis</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Employee Analysis Tools</span><br>
+              <a href="https://www.linkedin.com" target="_blank">LinkedIn</a> •
+              <a href="https://indeed.com" target="_blank">Indeed</a> •
+              <a href="https://glassdoor.com" target="_blank">Glassdoor</a>
+            </div>
+          </div>
+
+          <h4>Check:</h4>
+          <ul>
+            <li><strong>Employee counts match claimed company size:</strong> <input type="text" class="field-input" placeholder="Enter employee count verification"></li>
+            <li><strong>Roles are consistent with business model:</strong> <input type="text" class="field-input" placeholder="Enter role consistency check"></li>
+            <li><strong>Recent hiring/firing patterns:</strong> <input type="text" class="field-input" placeholder="Enter hiring/firing patterns"></li>
+          </ul>
+
+          <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Very few or zero employees listed on LinkedIn for an allegedly large company</span><br>
+      <span class="red-flag">• Employee profiles with inconsistent or suspicious work histories</span><br>
+      <span class="red-flag">• Multiple employees using stock photos or AI-generated profile images</span><br>
+      <span class="red-flag">• Employees with identical job descriptions across different companies</span><br>
+      <span class="red-flag">• Workforce overwhelmingly “new” (all profiles created in the same month)</span><br>
+      <span class="red-flag">• Employees connected to high-risk firms, scams, or dissolved entities</span><br>
+      <span class="red-flag">• Discrepancies between claimed headcount and publicly verifiable numbers</span><br>
+      <span class="red-flag">• Large number of employees located in high-risk or secrecy jurisdictions</span><br>
+      <span class="red-flag">• Employee roles do not match the company’s claimed business model</span><br>
+      <span class="red-flag">• Fake or incomplete profiles used to fabricate legitimacy</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <h3>6.3 Developer & Technical Footprint</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Developer Footprint Tools</span><br>
+              <a href="https://github.com/search" target="_blank">GitHub Search</a> •
+              <a href="https://gitlab.com/search" target="_blank">GitLab Search</a> •
+              <a href="https://stackoverflow.com" target="_blank">StackOverflow</a>
+            </div>
+          </div>
+
+          <h4>Look for:</h4>
+          <ul>
+            <li><strong>Company repositories:</strong> <input type="text" class="field-input" placeholder="Enter repository findings"></li>
+            <li><strong>Code quality and activity:</strong> <input type="text" class="field-input" placeholder="Enter code quality assessment"></li>
+            <li><strong>Open source contributions:</strong> <input type="text" class="field-input" placeholder="Enter open source activity"></li>
+            <li><strong>Leaked credentials or secrets in code:</strong> <input type="text" class="field-input" placeholder="Enter leaked credentials findings"></li>
+          </ul>
+
+          <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Company GitHub/GitLab accounts do not exist despite claims of technical work</span><br>
+      <span class="red-flag">• Developer accounts with no commits, no followers, or recently created profiles</span><br>
+      <span class="red-flag">• Public repositories exposing credentials, API keys, or internal tokens</span><br>
+      <span class="red-flag">• Repositories copied/forked from other companies without attribution</span><br>
+      <span class="red-flag">• Developers involved in past security incidents or questionable projects</span><br>
+      <span class="red-flag">• Inconsistent commit history (e.g., all commits on the same day)</span><br>
+      <span class="red-flag">• Technical stack shown in repos does not match what company claims</span><br>
+      <span class="red-flag">• Developers located exclusively in high-risk jurisdictions with no stated reason</span><br>
+      <span class="red-flag">• Repos containing malware signatures, suspicious binaries, or obfuscated code</span><br>
+      <span class="red-flag">• Sudden deletion of developer accounts or repos during investigation</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <h3>6.4 Social Identity Cross-Linking</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Social Platform Links</span><br>
+              <a href="https://twitter.com" target="_blank">Twitter/X</a> •
+              <a href="https://facebook.com" target="_blank">Facebook</a> •
+              <a href="https://instagram.com" target="_blank">Instagram</a> •
+              <a href="https://github.com" target="_blank">GitHub</a>
+            </div>
+          </div>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Social media profiles not linked to each other or to the company's official pages</span><br>
+      <span class="red-flag">• Profiles using different names, locations, or job titles across platforms</span><br>
+      <span class="red-flag">• Executive or employee accounts with no mutual follows or internal connections</span><br>
+      <span class="red-flag">• Mismatch between profile photos across sites (AI-generated, stock, or reused images)</span><br>
+      <span class="red-flag">• Sudden creation of multiple social profiles in a short time window</span><br>
+      <span class="red-flag">• Social accounts linking to websites or domains not controlled by the company</span><br>
+      <span class="red-flag">• Claims made on social media not supported by legal filings or corporate website</span><br>
+      <span class="red-flag">• Duplicate identities or impersonation indicators across platforms</span><br>
+      <span class="red-flag">• Missing or inconsistent bios, employment dates, or company descriptions</span><br>
+      <span class="red-flag">• Social presence inconsistent with claimed company size or industry activity</span>
+    </div>
+  </div>
+
+</details>
+
+
+                    <div class="notes-box" data-section="sec-mod13">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+
+
+          <h3>6.5 Email Exposure</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Email Exposure Tools</span><br>
+              <a href="https://haveibeenpwned.com" target="_blank">HaveIBeenPwned</a> •
+              <a href="https://breachdirectory.org" target="_blank">BreachDirectory</a> •
+              <a href="https://intelx.io" target="_blank">Intelligence X</a> •
+              <a href="https://pastebin.com/search" target="_blank">Pastebin</a>
+            </div>
+          </div>
+
+          <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div>⚠️ <span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Company email addresses appearing in breach or credential dumps</span><br>
+      <span class="red-flag">• Exposed plaintext passwords associated with corporate accounts</span><br>
+      <span class="red-flag">• Executive or privileged accounts included in leaked datasets</span><br>
+      <span class="red-flag">• High volume of leaked emails from the same domain</span><br>
+      <span class="red-flag">• Emails found in phishing kits, spam lists, or attacker infrastructure</span><br>
+      <span class="red-flag">• Password reuse detected between corporate and non-corporate services</span><br>
+      <span class="red-flag">• Employees using personal email accounts for business-related activity</span><br>
+      <span class="red-flag">• Business email domains used to register accounts on high-risk platforms</span><br>
+      <span class="red-flag">• Email patterns revealing internal structure or privileged accounts</span><br>
+      <span class="red-flag">• Recently leaked or freshly posted credentials indicating active risk</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <div class="notes-box" data-section="sec-mod14">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Document executive verification results and employee legitimacy.</div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 7: REPUTATION & SENTIMENT -->
+    <section id="sec-mod5" class="section-card">
+      <details class="section-toggle">
+        <summary class="section-summary">
+          <div class="section-summary-left">
+            <div class="section-icon">📢</div>
+            <div class="section-title-text">
+              <span class="section-title-main">7. Public Reputation & Sentiment</span>
+              <span class="section-title-sub">Search engines, reviews, news, forums, and consumer protection databases.</span>
+            </div>
+          </div>
+          <div class="section-chevron">▼</div>
+        </summary>
+        <div class="section-inner">
+          
+          <h3>7.1 Google Dorking</h3>
+          
+          <h4>Useful Dorks:</h4>
+          <pre><code>"Company Name" scam
+"Company Name" complaints
+"Company Name" lawsuit
+site:reddit.com "Company Name"</code></pre>
+
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Sensitive directories exposed (e.g., /admin/, /backup/, /private/)</span><br>
+      <span class="red-flag">• Indexes of files publicly accessible via “index of” results</span><br>
+      <span class="red-flag">• Documents containing internal data (PDFs, DOCX, CSVs) indexed by Google</span><br>
+      <span class="red-flag">• Exposed environment files (.env, config.php, credentials.txt)</span><br>
+      <span class="red-flag">• Login portals or admin panels indexed that should not be public</span><br>
+      <span class="red-flag">• Public Git repositories or development code accidentally indexed</span><br>
+      <span class="red-flag">• Cached versions of pages revealing sensitive information</span><br>
+      <span class="red-flag">• Cameras, IoT devices, or internal dashboards discoverable via dorks</span><br>
+      <span class="red-flag">• Passwords or API keys exposed in paste sites indexed by Google</span><br>
+      <span class="red-flag">• Historical cached pages showing previous data leaks or misconfigurations</span>
+    </div>
+  </div>
+
+</details>
+
+          <div class="notes-box" data-section="sec7-mod15">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+
+
+          <h3>7.2 Review & Reputation Platforms</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Reputation Tools</span><br>
+              <a href="https://www.trustpilot.com" target="_blank">Trustpilot</a> •
+              <a href="https://www.bbb.org" target="_blank">BBB</a> •
+              <a href="https://www.scamadviser.com" target="_blank">Scamadviser</a> •
+              <a href="https://www.sitejabber.com" target="_blank">SiteJabber</a> •
+              <a href="https://www.consumeraffairs.com" target="_blank">ConsumerAffairs</a> •
+              <a href="https://www.g2.com" target="_blank">G2</a> •
+              <a href="https://www.capterra.com" target="_blank">Capterra</a>
+            </div>
+          </div>
+
+          <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Large number of negative reviews across multiple platforms</span><br>
+      <span class="red-flag">• Consistent complaints about fraud, non-delivery, or unethical behavior</span><br>
+      <span class="red-flag">• Reviews mentioning legal, financial, or contract disputes</span><br>
+      <span class="red-flag">• Sudden spike in negative reviews within a short timeframe</span><br>
+      <span class="red-flag">• Reviews that appear coordinated or linked to known scam patterns</span><br>
+      <span class="red-flag">• Company posting fake positive reviews to counterbalance negatives</span><br>
+      <span class="red-flag">• Discrepancies between customer reviews and company claims</span><br>
+      <span class="red-flag">• Significant complaints about customer support or lack of response</span><br>
+      <span class="red-flag">• Business accused of deceptive billing or unauthorized charges</span><br>
+      <span class="red-flag">• Reviews mentioning compromised data, breach incidents, or security issues</span>
+    </div>
+  </div>
+
+</details>
+
+          <div class="notes-box" data-section="sec7-mod16">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes </span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+
+          <h3>7.3 Reddit & Community Sentiment</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Community Tools</span><br>
+              <a href="https://reddit.com" target="_blank">Reddit</a>
+            </div>
+          </div>
+
+          <h4>Search patterns:</h4>
+          <pre><code>site:reddit.com "Company Name"
+site:reddit.com "Company Name" scam
+site:reddit.com "Company Name" review</code></pre>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div>⚠️ <span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Multiple Reddit threads raising concerns about scams or unethical behavior</span><br>
+      <span class="red-flag">• Consistent negative sentiment across unrelated subreddits</span><br>
+      <span class="red-flag">• Former employees posting whistleblower-like claims or warnings</span><br>
+      <span class="red-flag">• Reports of customers losing money, being misled, or receiving fake products</span><br>
+      <span class="red-flag">• “Avoid this company” posts with high upvotes or long comment chains</span><br>
+      <span class="red-flag">• Accusations of data misuse, security failures, or shady partnerships</span><br>
+      <span class="red-flag">• Threads repeatedly removed or locked due to controversy</span><br>
+      <span class="red-flag">• Astroturfing: obvious fake positive posts or new accounts defending the company</span><br>
+      <span class="red-flag">• Patterns of unresolved complaints across multiple years</span><br>
+      <span class="red-flag">• Mentions of law enforcement involvement or pending investigations</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <div class="notes-box" data-section="sec7-mod17">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+
+          <h3>7.4 Social Media Reputation</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Social Media Platforms</span><br>
+              <a href="https://twitter.com" target="_blank">Twitter/X</a> •
+              <a href="https://facebook.com" target="_blank">Facebook</a> •
+              <a href="https://youtube.com" target="_blank">YouTube</a>
+            </div>
+          </div>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• High volume of negative comments on official posts</span><br>
+      <span class="red-flag">• Complaints about scams, non-delivery, or unethical practices</span><br>
+      <span class="red-flag">• Sudden deletion of posts, comments, or entire social accounts</span><br>
+      <span class="red-flag">• Large number of bot-like or low-quality follower accounts</span><br>
+      <span class="red-flag">• Engagement patterns suggesting purchased likes or followers</span><br>
+      <span class="red-flag">• Discrepancy between follower count and actual engagement</span><br>
+      <span class="red-flag">• Users tagging the company in public complaints or legal threats</span><br>
+      <span class="red-flag">• Reports of customer support ghosting customers</span><br>
+      <span class="red-flag">• Executive or employee accounts involved in controversy</span><br>
+      <span class="red-flag">• Social media profiles promoting misleading claims or fake partnerships</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <div class="notes-box" data-section="sec7-mod18">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+
+          <h3>7.5 Press & News Sources</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">News Sources</span><br>
+              <a href="https://news.google.com" target="_blank">Google News</a> •
+              <a href="https://www.bing.com/news" target="_blank">Bing News</a> •
+              <a href="https://finance.yahoo.com" target="_blank">Yahoo Finance</a> •
+              <a href="https://www.prnewswire.com" target="_blank">PRNewswire</a> •
+              <a href="https://www.businesswire.com" target="_blank">BusinessWire</a> •
+              <a href="https://archive.org/web" target="_blank">Wayback Machine News</a>
+            </div>
+          </div>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Negative press coverage on fraud, lawsuits, or regulatory issues</span><br>
+      <span class="red-flag">• News reports contradicting the company’s public claims or marketing</span><br>
+      <span class="red-flag">• Investigative journalism linking the company to criminal or illicit activity</span><br>
+      <span class="red-flag">• Articles reporting data breaches, insider misconduct, or security failures</span><br>
+      <span class="red-flag">• Press releases using vague, unverifiable, or exaggerated claims</span><br>
+      <span class="red-flag">• Company news coverage limited to self-published or low-credibility outlets</span><br>
+      <span class="red-flag">• Sudden spike in negative news within a short timeframe</span><br>
+      <span class="red-flag">• Major business announcements not corroborated by reputable news sources</span><br>
+      <span class="red-flag">• Articles mentioning financial instability, layoffs, or restructuring</span><br>
+      <span class="red-flag">• Patterns of disputes, controversies, or repeated public scandals</span>
+    </div>
+  </div>
+
+</details>
+
+          <div class="notes-box" data-section="sec7-mod19">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+
+          <h3>7.6 Employee Review Sentiment</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Employee Review Platforms</span><br>
+              <a href="https://glassdoor.com" target="_blank">Glassdoor</a> •
+              <a href="https://indeed.com" target="_blank">Indeed</a>
+            </div>
+          </div>
+
+          <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Large number of negative reviews across Glassdoor, Indeed, Blind, etc.</span><br>
+      <span class="red-flag">• Consistent complaints about toxic culture, unethical behavior, or mismanagement</span><br>
+      <span class="red-flag">• Reports of late payments, salary disputes, or unpaid wages</span><br>
+      <span class="red-flag">• Claims of overworked staff, burnout, or extreme turnover</span><br>
+      <span class="red-flag">• Employees alleging fraudulent business practices or illegal activity</span><br>
+      <span class="red-flag">• Reviews mentioning security failures or mishandling of customer data</span><br>
+      <span class="red-flag">• Complaints about instability, sudden layoffs, or restructuring</span><br>
+      <span class="red-flag">• Reviews stating the company is a “scam,” “shell,” or “fake operation”</span><br>
+      <span class="red-flag">• Surge of negative reviews posted within a short time period</span><br>
+      <span class="red-flag">• Suspiciously generic positive reviews likely written by the company</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <div class="notes-box" data-section="sec7-mod20">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Record findings.</div>
+          </div>
+
+          <h3>7.7 Consumer Protection Databases</h3>
+          
+          <div class="callout tool">
+            <div>🧰 <span class="callout-label">Consumer Protection Resources</span><br>
+              <a href="https://www.ripoffreport.com" target="_blank">Ripoff Report</a> •
+              <a href="https://www.consumeraffairs.com" target="_blank">ConsumerAffairs</a> •
+              <a href="https://www.ftc.gov" target="_blank">FTC Complaints</a>
+            </div>
+          </div>
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Multiple complaints filed with BBB, CFPB, FTC, or state AG offices</span><br>
+      <span class="red-flag">• Pattern of unresolved or ignored complaints across platforms</span><br>
+      <span class="red-flag">• Complaints involving fraud, deception, or predatory business practices</span><br>
+      <span class="red-flag">• Reports of unauthorized charges, billing disputes, or refund issues</span><br>
+      <span class="red-flag">• Company listed on scam-watch or consumer alert databases</span><br>
+      <span class="red-flag">• Regulatory warnings issued by consumer protection agencies</span><br>
+      <span class="red-flag">• Repeated complaints about data privacy violations or misuse of personal data</span><br>
+      <span class="red-flag">• High ratio of severe complaints (e.g., “company stole my money”)</span><br>
+      <span class="red-flag">• Businesses operating without proper licensing or disclosures</span><br>
+      <span class="red-flag">• Evidence of coordinated consumer harm across multiple jurisdictions</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <div class="notes-box" data-section="sec7-mod21">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Document overall reputation and any patterns in complaints or praise.</div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 8: LOCAL AUTOMATED SCANNING -->
+    <section id="sec-mod6" class="section-card">
+      <details class="section-toggle">
+        <summary class="section-summary">
+          <div class="section-summary-left">
+            <div class="section-icon">🤖</div>
+            <div class="section-title-text">
+              <span class="section-title-main">8. Local Automated Scanning</span>
+              <span class="section-title-sub">SpiderFoot, theHarvester, and Recon-ng to enrich findings.</span>
+            </div>
+          </div>
+          <div class="section-chevron">▼</div>
+        </summary>
+        <div class="section-inner">
+          
+          <h3>8.1 SpiderFoot (Local)</h3>
+          
+          <h4>Install & Run:</h4>
+          <pre><code>python3 sf.py -l 127.0.0.1:5001</code></pre>
+
+          <p>SpiderFoot is a powerful automated OSINT collection tool that queries multiple data sources. This will be a seperate external report.</p>
+
+          <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Large number of high-severity alerts generated across multiple modules</span><br>
+      <span class="red-flag">• Discovery of compromised or malicious IPs connected to company assets</span><br>
+      <span class="red-flag">• Exposed credentials or email/password pairs found via breach modules</span><br>
+      <span class="red-flag">• Subdomain takeover warnings or abandoned cloud resources</span><br>
+      <span class="red-flag">• Evidence of phishing kits or spoofed domains associated with the company</span><br>
+      <span class="red-flag">• WHOIS data showing frequent or suspicious ownership changes</span><br>
+      <span class="red-flag">• Infrastructure linked to malware, botnets, or spam networks</span><br>
+      <span class="red-flag">• Leaked documents or public data indexed via open sources</span><br>
+      <span class="red-flag">• High-risk technology stack findings (outdated servers, exploitable versions)</span><br>
+      <span class="red-flag">• Cross-correlation showing repeated presence in OSINT risk lists</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <h3>8.2 theHarvester</h3>
+          
+          <h4>Basic Usage:</h4>
+          <pre><code>theHarvester -d example.com -b all</code></pre>
+
+          <p>TheHarvester gathers emails, names, subdomains, IPs, and URLs from multiple public sources. This will be a seperate external report.</p>
+
+          <details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Large number of corporate emails exposed from public sources</span><br>
+      <span class="red-flag">• Executive or privileged accounts appearing in the results</span><br>
+      <span class="red-flag">• Emails discovered on high-risk services (Pastebin, breach forums, etc.)</span><br>
+      <span class="red-flag">• Domains linked to phishing, malware, or suspicious external infrastructure</span><br>
+      <span class="red-flag">• Discovery of previously unknown subdomains with sensitive names</span><br>
+      <span class="red-flag">• External hosts associated with outdated or exploitable technologies</span><br>
+      <span class="red-flag">• IP addresses tied to spam lists, botnets, or malicious activity</span><br>
+      <span class="red-flag">• Email patterns revealing internal structure or naming conventions</span><br>
+      <span class="red-flag">• Unusual number of related domains not mentioned anywhere publicly</span><br>
+      <span class="red-flag">• Hits referencing exposed documents, logs, environment files, or configs</span>
+    </div>
+  </div>
+
+</details>
+
+
+          <h3>8.3 Recon-ng</h3>
+          
+          <h4>Basic Usage:</h4>
+          <pre><code>recon-ng
+use recon/domains-hosts/bing_host</code></pre>
+
+          <p>Recon-ng is a modular framework for web-based reconnaissance. This will be a different external report.</p>
+
+
+<details class="redflag-toggle">
+  <summary>🚩 Red Flags (click to expand)</summary>
+
+  <div class="callout warn">
+    <div><span class="callout-label">Red Flags</span><br>
+      <span class="red-flag">• Discovery of leaked credentials or breached email addresses</span><br>
+      <span class="red-flag">• Identification of previously unknown domains or subdomains</span><br>
+      <span class="red-flag">• Hostnames or IPs linked to malicious activity through threat intel modules</span><br>
+      <span class="red-flag">• External infrastructure exposing outdated or vulnerable technologies</span><br>
+      <span class="red-flag">• WHOIS records showing frequent ownership or registrar changes</span><br>
+      <span class="red-flag">• Geo-IP and ASN results pointing to high-risk hosting providers</span><br>
+      <span class="red-flag">• Social modules revealing fake, inconsistent, or newly-created employee accounts</span><br>
+      <span class="red-flag">• Discovery of sensitive metadata from documents or exposed assets</span><br>
+      <span class="red-flag">• DNS modules exposing MX, SPF, or DMARC misconfigurations</span><br>
+      <span class="red-flag">• Correlation showing repeated appearance across risk, malware, or blacklist datasets</span>
+    </div>
+  </div>
+
+</details>
+
+
+
+          <div class="notes-box" data-section="sec-mod22">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Document results from SpiderFoot, theHarvester, and Recon-ng.</div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 9: RISK SCORING MODEL -->
+    <section id="sec-risk" class="section-card">
+      <details class="section-toggle">
+        <summary class="section-summary">
+          <div class="section-summary-left">
+            <div class="section-icon">📊</div>
+            <div class="section-title-text">
+              <span class="section-title-main">9. Risk Scoring Model (Version 2.1)</span>
+              <span class="section-title-sub">Weighted multi-category model (0–100) with high-risk overrides.</span>
+            </div>
+          </div>
+          <div class="section-chevron">▼</div>
+        </summary>
+        <div class="section-inner">
+          
+          <p>This scoring model provides a quantitative, repeatable, and defensible assessment of overall organizational risk by aggregating findings from Modules 1–5.</p>
+
+          <h3>9.1 Category Scores (0–5 Scale)</h3>
+          
+          <p>Each category receives a raw score from 0 to 5:</p>
+          <ul>
+            <li><strong>0 = Excellent</strong></li>
+            <li><strong>1 = Good</strong></li>
+            <li><strong>2 = Fair</strong></li>
+            <li><strong>3 = Concerning</strong></li>
+            <li><strong>4 = High Risk</strong></li>
+            <li><strong>5 = Critical / Severe</strong></li>
+          </ul>
+
+          <h3>9.2 Category Weights</h3>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Corporate Legitimacy</td>
+                <td>20%</td>
+              </tr>
+              <tr>
+                <td>Cyber Exposure</td>
+                <td>25%</td>
+              </tr>
+              <tr>
+                <td>Infrastructure Quality</td>
+                <td>15%</td>
+              </tr>
+              <tr>
+                <td>Employee Credibility</td>
+                <td>10%</td>
+              </tr>
+              <tr>
+                <td>Reputation & Sentiment</td>
+                <td>10%</td>
+              </tr>
+              <tr>
+                <td>Legal & Financial Risk</td>
+                <td>20%</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>9.3 Category Definitions & Scoring Guidance</h3>
+
+          <h4>A. Corporate Legitimacy (0–5) — Weight 20%</h4>
+          <p><em>Evaluate based on Module 3.</em></p>
+          <p><strong>Factors:</strong></p>
+          <ul>
+            <li>Corporate registry presence</li>
+            <li>Filing history</li>
+            <li>Valid business identity</li>
+            <li>Real operational address</li>
+            <li>Consistent legal identity</li>
+          </ul>
+          <p><strong>Score Guide:</strong></p>
+          <ul>
+            <li><strong>0–1:</strong> Fully verified; strong documentation across registries</li>
+            <li><strong>2:</strong> Minor inconsistencies, but valid</li>
+            <li><strong>3:</strong> Questionable documentation or missing filings</li>
+            <li><strong>4:</strong> Serious inconsistencies or shell-like patterns</li>
+            <li><strong>5:</strong> No legal registration; dissolved; fake entity indicators</li>
+          </ul>
+
+          <h4>B. Cyber Exposure (0–5) — Weight 25%</h4>
+          <p><em>Evaluate based on Module 2.</em></p>
+          <p><strong>Factors:</strong></p>
+          <ul>
+            <li>Exposed RDP/SSH/VNC</li>
+            <li>Exposed databases</li>
+            <li>ICS/OT exposure</li>
+            <li>Old/insecure TLS</li>
+            <li>Malware/OTX flags</li>
+          </ul>
+          <p><strong>Score Guide:</strong></p>
+          <ul>
+            <li><strong>0–1:</strong> Minimal exposure, modern config</li>
+            <li><strong>2:</strong> Some exposures or outdated headers</li>
+            <li><strong>3:</strong> Multiple weak points</li>
+            <li><strong>4:</strong> High-risk services (DBs, RDP) exposed</li>
+            <li><strong>5:</strong> Critical exposures (ICS, C2 activity, malware hosting)</li>
+          </ul>
+
+          <h4>C. Infrastructure Quality (0–5) — Weight 15%</h4>
+          <p><em>Evaluate based on Modules 1 & 2.</em></p>
+          <p><strong>Factors:</strong></p>
+          <ul>
+            <li>Hosting quality</li>
+            <li>DNS hygiene</li>
+            <li>Subdomain sprawl</li>
+            <li>Use of reputable providers</li>
+            <li>Historical infrastructure changes</li>
+          </ul>
+          <p><strong>Score Guide:</strong></p>
+          <ul>
+            <li><strong>0–1:</strong> Clean modern stack; stable infra</li>
+            <li><strong>2:</strong> Some outdated components</li>
+            <li><strong>3:</strong> Mixed hosting providers; inconsistent stack</li>
+            <li><strong>4:</strong> Poor infrastructure hygiene</li>
+            <li><strong>5:</strong> Suspicious hosting or constant migrations</li>
+          </ul>
+
+          <h4>D. Employee Credibility (0–5) — Weight 10%</h4>
+          <p><em>Evaluate based on Module 4.</em></p>
+          <p><strong>Factors:</strong></p>
+          <ul>
+            <li>Real executive profiles</li>
+            <li>Employee count consistency</li>
+            <li>Developer footprint</li>
+            <li>Identity authenticity</li>
+            <li>AI-generated/fake staff detection</li>
+          </ul>
+          <p><strong>Score Guide:</strong></p>
+          <ul>
+            <li><strong>0–1:</strong> Strong, consistent, real staff</li>
+            <li><strong>2:</strong> Some employees missing history</li>
+            <li><strong>3:</strong> Weak employee footprint</li>
+            <li><strong>4:</strong> Possible fake/AI-generated profiles</li>
+            <li><strong>5:</strong> No employees; completely fake team</li>
+          </ul>
+
+          <h4>E. Reputation & Sentiment (0–5) — Weight 10%</h4>
+          <p><em>Evaluate based on Module 5.</em></p>
+          <p><strong>Factors:</strong></p>
+          <ul>
+            <li>Trustpilot/BBB reviews</li>
+            <li>Reddit sentiment</li>
+            <li>Forum sentiment</li>
+            <li>Complaint databases</li>
+            <li>Press coverage</li>
+          </ul>
+          <p><strong>Score Guide:</strong></p>
+          <ul>
+            <li><strong>0–1:</strong> Mostly positive reputation</li>
+            <li><strong>2:</strong> Mixed sentiment</li>
+            <li><strong>3:</strong> Notable complaints</li>
+            <li><strong>4:</strong> Pattern of negative reviews or scams</li>
+            <li><strong>5:</strong> Severe allegations, major fraud signals</li>
+          </ul>
+
+          <h4>F. Legal & Financial Risk (0–5) — Weight 20%</h4>
+          <p><em>Evaluate based on Module 3.</em></p>
+          <p><strong>Factors:</strong></p>
+          <ul>
+            <li>Litigation</li>
+            <li>Sanctions exposure</li>
+            <li>Enforcement actions</li>
+            <li>Fraud lawsuits</li>
+            <li>Financial filings</li>
+          </ul>
+          <p><strong>Score Guide:</strong></p>
+          <ul>
+            <li><strong>0–1:</strong> Clean legal/financial record</li>
+            <li><strong>2:</strong> Some litigation, low severity</li>
+            <li><strong>3:</strong> Multiple legal actions or penalties</li>
+            <li><strong>4:</strong> Major lawsuits or investigations</li>
+            <li><strong>5:</strong> Sanctions, criminal records, regulatory enforcement</li>
+          </ul>
+
+          <h3>9.4 Scoring Formula</h3>
+          
+          <pre><code>Final Risk Score = 
+  (Corporate Legitimacy × 0.20) +
+  (Cyber Exposure × 0.25) +
+  (Infrastructure Quality × 0.15) +
+  (Employee Credibility × 0.10) +
+  (Reputation × 0.10) +
+  (Legal/Financial Risk × 0.20)
+
+Max score = 5.0
+
+Convert to 100-point scale:
+Final Score (0–100) = Weighted Score × 20</code></pre>
+
+          <h3>9.5 Risk Tiers</h3>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Final Score</th>
+                <th>Risk Tier</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0–20</td>
+                <td>Low Risk</td>
+                <td>Strong legitimacy, minimal cyber exposure</td>
+              </tr>
+              <tr>
+                <td>21–40</td>
+                <td>Medium Risk</td>
+                <td>Some concerns; monitor closely</td>
+              </tr>
+              <tr>
+                <td>41–60</td>
+                <td>High Risk</td>
+                <td>Significant red flags across modules</td>
+              </tr>
+              <tr>
+                <td>61–80</td>
+                <td>Severe Risk</td>
+                <td>Likely fraudulent, compromised, or unsafe</td>
+              </tr>
+              <tr>
+                <td>81–100</td>
+                <td>Critical / Do Not Engage</td>
+                <td>Severe multi-class failures; avoid</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>9.6 High-Risk Overrides</h3>
+          
+          <div class="callout warn">
+            <div>⚠️ <span class="callout-label">Automatic HIGH Risk</span><br>
+              <span class="red-flag">• Exposed RDP/VNC/DB with no mitigations</span><br>
+              <span class="red-flag">• Executive emails in breach leaks with passwords</span><br>
+              <span class="red-flag">• Multiple unresolved BBB complaints</span><br>
+              <span class="red-flag">• Company dissolved in official registry</span>
+            </div>
+          </div>
+
+          <div class="callout warn">
+            <div>⚠️ <span class="callout-label">Automatic SEVERE Risk</span><br>
+              <span class="red-flag">• Confirmed sanctions listing</span><br>
+              <span class="red-flag">• Malware/C2 hosting on VirusTotal or OTX</span><br>
+              <span class="red-flag">• Fake/AI-generated executives or employee profiles</span><br>
+              <span class="red-flag">• Fraud lawsuits involving customers</span><br>
+              <span class="red-flag">• No corporate registration found</span><br>
+              <span class="red-flag">• Infrastructure used in prior criminal activity</span>
+            </div>
+          </div>
+
+          <h3>9.7 Confidence Modifier (Optional)</h3>
+          
+          <p>Add a Confidence Rating (1–5) for how complete your OSINT was:</p>
+          <ul>
+            <li><strong>5 = Full OSINT coverage</strong></li>
+            <li><strong>4 = Very good coverage</strong></li>
+            <li><strong>3 = Moderate gaps</strong></li>
+            <li><strong>2 = Major missing data</strong></li>
+            <li><strong>1 = Limited OSINT</strong></li>
+          </ul>
+
+          <p><strong>Example presentation:</strong></p>
+          <pre><code>Score: 47/100 — High Risk
+Confidence: 4/5</code></pre>
+
+          <div class="notes-box" data-section="sec-risk23">
+            <div class="notes-box-header">
+              <div class="notes-label-left"><span class="icon">📝</span><span>Investigator Notes</span></div>
+              <span class="notes-status"></span>
+            </div>
+            <textarea class="section-notes" placeholder=""></textarea>
+            <div class="notes-hint">Document your scoring rationale and any automatic overrides applied.</div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+  </main>
+
+  <script>
+(function() {
+  const NOTES_PREFIX = 'osint_corp_notes_';
+  const FIELD_PREFIX = 'osint_corp_field_';
+
+  function eachNode(list, fn) {
+    Array.prototype.forEach.call(list, fn);
+  }
+
+  // ---- NOTES (per-section investigator notes) ----
+  function initNotes() {
+    const boxes = document.querySelectorAll('.notes-box');
+    boxes.forEach(box => {
+      const sectionId = box.getAttribute('data-section');
+      const textarea = box.querySelector('.section-notes');
+      const status = box.querySelector('.notes-status');
+      if (!sectionId || !textarea) return;
+
+      const saved = localStorage.getItem(NOTES_PREFIX + sectionId);
+      if (saved !== null) {
+        textarea.value = saved;
+        if (status) status.textContent = '✓ Saved';
+      }
+
+      textarea.addEventListener('input', () => {
+        localStorage.setItem(NOTES_PREFIX + sectionId, textarea.value);
+        if (status) status.textContent = '✓ Saved';
+      });
+    });
+  }
+
+  // ---- FIELD AUTOSAVE (all other inputs/textarea) ----
+  function initFieldPersistence() {
+    const fields = document.querySelectorAll('input, textarea');
+    fields.forEach((el, idx) => {
+      if (el.id === 'global-search') return;
+      if (el.classList.contains('section-notes')) return;
+      if (el.type === 'file') return;
+
+      const key = FIELD_PREFIX + idx;
+      const saved = localStorage.getItem(key);
+      if (saved !== null) el.value = saved;
+
+      el.addEventListener('input', () => {
+        localStorage.setItem(key, el.value);
+      });
+    });
+  }
+
+  // ---- CLEAR EVERYTHING (notes + fields) ----
+  function clearAll() {
+    if (!confirm('Clear all saved notes and form data for this manual on this device?')) return;
+
+    // Notes
+    document.querySelectorAll('.notes-box').forEach(box => {
+      const sectionId = box.getAttribute('data-section');
+      const textarea = box.querySelector('.section-notes');
+      const status = box.querySelector('.notes-status');
+      if (!sectionId || !textarea) return;
+      textarea.value = '';
+      localStorage.removeItem(NOTES_PREFIX + sectionId);
+      if (status) status.textContent = '';
+    });
+
+    // Fields
+    const fields = document.querySelectorAll('input, textarea');
+    fields.forEach((el, idx) => {
+      if (el.id === 'global-search') return;
+      if (el.classList.contains('section-notes')) return;
+      if (el.type === 'file') return;
+      el.value = '';
+      localStorage.removeItem(FIELD_PREFIX + idx);
+    });
+  }
+
+  // ---- EXPORT (notes + fields) ----
+  function getSectionTitleForEl(el) {
+    let current = el;
+    while (current) {
+      if (current.classList && current.classList.contains('section-card')) {
+        const titleEl = current.querySelector('.section-title-main');
+        if (titleEl) return titleEl.textContent.trim();
+        const h = current.querySelector('h2, h3');
+        if (h) return h.textContent.trim();
+      }
+      current = current.parentElement;
+    }
+    return 'Global';
+  }
+
+  function getFieldLabel(el) {
+    const li = el.closest('li');
+    if (li) {
+      const strong = li.querySelector('strong');
+      if (strong) return strong.textContent.replace(':', '').trim();
+    }
+    const label = el.closest('label') || (el.parentElement && el.parentElement.querySelector('label'));
+    if (label) return label.textContent.replace(':', '').trim();
+    if (el.placeholder) return el.placeholder.trim();
+    return 'Field';
+  }
+
+  function exportAll() {
+    const out = {
+      meta: {
+        exported_at: new Date().toISOString(),
+        format: 'osint_corp_screening_v2.1'
+      },
+      notes: {},
+      fields: {}
+    };
+
+    // Notes
+    document.querySelectorAll('.notes-box').forEach(box => {
+      const sectionId = box.getAttribute('data-section');
+      const textarea = box.querySelector('.section-notes');
+      if (!sectionId || !textarea) return;
+      out.notes[sectionId] = textarea.value || '';
+    });
+
+    // Fields
+    const fields = document.querySelectorAll('input, textarea');
+    fields.forEach(el => {
+      if (el.id === 'global-search') return;
+      if (el.classList.contains('section-notes')) return;
+      if (el.type === 'file') return;
+      const sectionTitle = getSectionTitleForEl(el);
+      const label = getFieldLabel(el);
+      if (!out.fields[sectionTitle]) out.fields[sectionTitle] = {};
+      out.fields[sectionTitle][label] = el.value || '';
+    });
+
+    const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    a.href = url;
+    a.download = 'osint_corp_screening_export_' + ts + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ---- NAVIGATION (sidebar links + active section highlighting) ----
+  function initNav() {
+    const links = document.querySelectorAll('#nav-list a');
+    links.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const href = link.getAttribute('href');
+        if (!href || !href.startsWith('#')) return;
+        const target = document.querySelector(href);
+        if (!target) return;
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', href);
+      });
+    });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        const id = entry.target.getAttribute('id');
+        if (!id) return;
+        const link = document.querySelector('#nav-list a[href="#' + id + '"]');
+        if (!link) return;
+        if (entry.isIntersecting) {
+          document.querySelectorAll('#nav-list a').forEach(a => a.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    }, {
+      rootMargin: '-40% 0px -50% 0px',
+      threshold: 0.1
+    });
+
+    document.querySelectorAll('main section[id]').forEach(sec => observer.observe(sec));
+  }
+
+  // ---- EXPAND / COLLAPSE ALL ----
+  function initExpandCollapse() {
+    const expandBtn = document.getElementById('btn-expand-all');
+    const collapseBtn = document.getElementById('btn-collapse-all');
+    if (expandBtn) {
+      expandBtn.addEventListener('click', () => {
+        document.querySelectorAll('details.section-toggle').forEach(det => det.open = true);
+        document.querySelectorAll('details.redflag-toggle').forEach(det => det.open = true);
+      });
+    }
+    if (collapseBtn) {
+      collapseBtn.addEventListener('click', () => {
+        document.querySelectorAll('details.section-toggle').forEach(det => det.open = false);
+        document.querySelectorAll('details.redflag-toggle').forEach(det => det.open = false);
+      });
+    }
+  }
+
+  // ---- GLOBAL SEARCH ----
+  function initSearch() {
+    const searchInput = document.getElementById('global-search');
+    if (!searchInput) return;
+    searchInput.addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      document.querySelectorAll('.section-card').forEach(sec => {
+        const text = sec.innerText.toLowerCase();
+        sec.style.display = text.includes(q) ? 'block' : 'none';
+      });
+    });
+  }
+
+  // ---- INIT ----
+  function initAll() {
+    initNotes();
+    initFieldPersistence();
+    initNav();
+    initExpandCollapse();
+    initSearch();
+
+    const exportBtn = document.getElementById('btn-export-notes');
+    const clearBtn = document.getElementById('btn-clear-notes');
+    if (exportBtn) exportBtn.addEventListener('click', exportAll);
+    if (clearBtn) clearBtn.addEventListener('click', clearAll);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll);
+  } else {
+    initAll();
+  }
+})();
+  </script>
+</body>
+</html>
